@@ -1,0 +1,14 @@
+﻿  CarDashboard.cpp
+C:\Users\Anayat\Github\ocv\dashboard\src\CarDashboard\CarDashboard.cpp(196): warning C4244: 'argument': conversion from 'float' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=int
+          ]
+C:\Users\Anayat\Github\ocv\dashboard\src\CarDashboard\CarDashboard.cpp(197): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\Anayat\Github\ocv\dashboard\src\CarDashboard\CarDashboard.cpp(220): warning C4244: 'argument': conversion from 'float' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=int
+          ]
+C:\Users\Anayat\Github\ocv\dashboard\src\CarDashboard\CarDashboard.cpp(221): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+  CarDashboard.vcxproj -> C:\Users\Anayat\Github\ocv\dashboard\src\CarDashboard\x64\Debug\CarDashboard.exe
