@@ -1,0 +1,4 @@
+﻿  TS_shape_Detect.cpp
+C:\Users\sriva\source\repos\Traffic_Sign_Detection\TS_shape_Detect.cpp(1,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\sriva\source\repos\Traffic_Sign_Detection\TS_shape_Detect.cpp(58,57): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+opencv_world410d.lib(opencv_world410d.dll) : fatal error LNK1112: module machine type 'x64' conflicts with target machine type 'x86'
