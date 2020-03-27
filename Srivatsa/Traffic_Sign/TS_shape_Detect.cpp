@@ -6,7 +6,8 @@ using namespace std;
 using namespace cv;
 char imgName[50];
 
-Mat src, img, ROI, gray, canny;
+Mat src, img, ROI, gray, canny, HSV;
+Mat Threshold;
 int frame_count = 0;
 
 //Function to create ROI TODO
@@ -125,8 +126,8 @@ void detect_Rectangle(Mat ROI)
 			approx.size() == 3;
 			setLabel(ROI, "TRIANGLE", contours[i]);    // Triangles
 			printf("Triangle detected\n");
-		}
-		*/
+		}*/
+		
 		else if (approx.size() >= 4 && approx.size() <= 6)
 		{
 			// Number of vertices of polygonal curve
@@ -144,27 +145,43 @@ void detect_Rectangle(Mat ROI)
 
 //Function to detect color//
 
-void color_detect()
+void color_detect(Mat ROI, Mat HSV, Mat Threshold)
 {
-	//code for Color Detection. TODO
+	int LH, LS, LV, HH, HS, HV;
+	cout << "Enter the value of H Parameter, Low Hue:";
+	cin >> LH;
+	cout << "Enter the value of S Parameter, Low Saturation:";
+	cin >> LS;
+	cout << "Enter the value of V Parameter, Low Value:";
+	cin >> LV;
+	cout << "Enter the value of H Parameter, High Hue:";
+	cin >> HH;
+	cout << "Enter the value of S Parameter, High Saturation:";
+	cin >> HS;
+	cout << "Enter the value of V Parameter, High Value:";
+	cin >> HV;
+	cvtColor(ROI, HSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+
+	inRange(HSV, Scalar(LH,LS, LV), Scalar(HH, HS, HV),	Threshold); //Threshold the image
 
 }
 
 int main(int argc, char* argv[])
 {
-	if (argc > 2)
+	if (argc > 3)
 	{
 		printf("Too many arguments\n");
 		return 1;
 	}
 
 	int num = atoi(argv[1]);
+	int color = atoi(argv[2]);
 
 	src = imread("C:/Users/sriva/source/repos/face_detection/face_detection/img/img/147.png");
-	if (src.empty())// TODO add error message
+	if (src.empty())
 	{
 		printf("Image not loaded\n");
-		return 1;
+		return -1;
 	}
 
 	while (1) 
@@ -173,22 +190,36 @@ int main(int argc, char* argv[])
 		if (num == 1)
 		{
 			cout << detect_circle(ROI);
+			if (color == 1)
+			{
+				color_detect(ROI, HSV, Threshold);
+				printf("Color_thresholded. Image window opened\n");
+			}
+			else
+			{
+				printf("Wrong parameter. Please Check Again.");
+			}
 			printf("Circle Detected_Function Called\n");
 		}
 		else if (num == 2);
 		{
 			detect_Rectangle(ROI);
-			printf("Rectangle Detected_Function Called\n");
-		}
-		/*else 
-		{
-			printf("Invalid Arguments\n");
-		}
-		*/
+			if (color == 1)
+			{
+				color_detect(ROI, HSV, Threshold);
+				printf("Color_thresholded. Image window opened\n");
+			}
+			else
+			{
+				printf("Wrong parameter. Please Check Again.");
+			}
+		}		
 		// Show in a window
 		imshow("Input", src);
 		imshow("cropped", ROI);
+		imshow("Threshold", Threshold);
 		cv::waitKey(0);
 		return 0;
 	}
 }
+
