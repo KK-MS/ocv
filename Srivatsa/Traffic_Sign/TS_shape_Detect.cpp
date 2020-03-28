@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
 		else if (num == 2);
 		{
 			detect_Rectangle(ROI);
-			if (color == 1)
+			if (color == 2)
 			{
 				color_detect(ROI, HSV, Threshold);
 				printf("Color_thresholded. Image window opened\n");
