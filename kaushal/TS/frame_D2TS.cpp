@@ -6,11 +6,6 @@
 using namespace std;
 using namespace cv;
 
-#define START_X 615
-#define START_Y 430
-#define END_Y 350
-#define FRAME_WIDTH 1280 
-
 RNG rng(12345);
 
 int main(int argc, char *argv[])
