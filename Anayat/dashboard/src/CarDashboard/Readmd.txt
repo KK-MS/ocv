@@ -1,0 +1,11 @@
+For detecting Red light select the values:
+X:220
+Y:185
+W:250
+H:250
+
+For detecting the green light select the values:
+X:800
+Y:150
+W:250
+H:250
