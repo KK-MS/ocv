@@ -1,31 +1,16 @@
 #include <iostream>.
 #include "opencv2/opencv.hpp"
 #include <stdio.h>
-
 using namespace std;
 using namespace cv;
 char imgName[50];
-
-Mat src, img, ROI, gray, canny, HSV;
+Mat src;
+Mat img;
+Mat ROI;
+Mat gray;
+Mat canny;
+Mat HSV;
 Mat Threshold;
-int frame_count = 0;
-
-//Function to create ROI TODO
-void create_ROI(cv::Mat src)
-{
-	int a, b, c, d;
-	cout << "Enter the value of top left x coordinate:";
-	cin >> a;
-	cout << "Enter the value of top left y coordinate:";
-	cin >> b;
-	cout << "Enter the value of rectangle width:";
-	cin >> c;
-	cout << "Enter the value of rectangle height:";
-	cin >> d;
-	img = src.clone();
-	Rect2i box(a,b,c,d);
-	ROI = src(box);
-}
 //Function to set labels in images//
 
 void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& contour)
@@ -43,15 +28,65 @@ void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& cont
 	cv::putText(im, label, pt, fontface, scale, CV_RGB(1, 1, 1), thickness, 8);
 }
 
-//Function to detect circle//
+//STructure to obtain parameters of the sign//
 
-int detect_circle(Mat ROI)
-{	
+struct obj_parameter
+{
+	//Input Parameters from the Ground Truth//
+	int gt_height;
+	int gt_width;
+	int gt_radius;
+	int gt_diameter;
+	int num;//Based on Shape
+	int color; // Based on Color
+	//Optional:- Localisation Parameters//
+	double gt_lat;
+	double gt_long;
+	double gt_bearing;
+	// From where the image was captured
+	double img_lat;
+	double img_long;
+	double img_bearing;
+	//Image Matrices
+	
+	//ROI Parameters//
+	int a;
+	int b;
+	int c;
+	int d;
+	//Output Parameters after detection (circle or any shape)//
+	int height;
+	int width;
+	int radius; // only for circle
+	int diameter; // only for circle
+	//Color Parameters
+	int LH;
+	int HH;
+};
+
+//Function to create ROI TODO
+void create_ROI(cv::Mat src)
+{
+	obj_parameter p;
+	cout << "Enter the value of top left x coordinate:";
+	cin >> p.a;
+	cout << "Enter the value of top left y coordinate:";
+	cin >> p.b;
+	cout << "Enter the value of rectangle width:";
+	cin >> p.c;
+	cout << "Enter the value of rectangle height:";
+	cin >> p.d;
+	Rect2i box(p.a, p.b, p.c, p.d);
+	ROI = src(box);
+}
+
+//Function to detect circle//
+obj_parameter detect_circle(Mat ROI, Mat gray)
+{
 	cvtColor(ROI, gray, COLOR_BGR2GRAY);
 
 	// Hough circles
 	GaussianBlur(gray, gray, Size(9, 9), 3, 3);
-
 	vector<Vec3f> circles;
 	HoughCircles(gray, circles, HOUGH_GRADIENT, 1, gray.rows, 250, 80, 0);
 
@@ -61,17 +96,17 @@ int detect_circle(Mat ROI)
 		int rad_2 = cvRound(circles[i][2]);
 
 		// draw the circle center
-		cv::circle(ROI, center, 2, Scalar(255, 0, 0), -1, 8, 0);
+		cv::circle(ROI, center, 2, Scalar(0, 0, 0), -3, 8, 0);
 
 		// draw the circle outline				
-		cv::circle(ROI, center, rad_2, Scalar(0, 255, 0), 2, 8, 0);
+		cv::circle(ROI, center, rad_2, Scalar(0, 0, 0), 1, 8, 0);
 
 		// Draw Rectangle
 
 		int cx, cy, cr, bound = 10;
-		cx = cvRound(circles[i][0]); 
-		cy = cvRound(circles[i][1]); 
-		cr = cvRound(circles[i][2]); 
+		cx = cvRound(circles[i][0]);
+		cy = cvRound(circles[i][1]);
+		cr = cvRound(circles[i][2]);
 		int x = cx - cr - bound;
 		int y = cy - cr - bound;
 		int h = (cr + bound) * 2;
@@ -79,31 +114,30 @@ int detect_circle(Mat ROI)
 
 		Rect rec_save = cv::Rect2i(x, y, h, w);
 
-		cv::rectangle(ROI, rec_save, Scalar(0, 0, 255), 4, 8, 0);
+		cv::rectangle(ROI, rec_save, Scalar(0, 0, 0), 1, 8, 0);
 		ROI = ROI(rec_save);
-
 		//Calculate Diameter//
 		int d = (2 * cr);
-		//printf("cx, cy, cr, x, y, h, w, %d, %d, %d, %d, %d, %d,  %d,\n", cx, cy, cr, x, y, h, w);
-		printf("cx = %d\n", cx); //Center Point X of circle
-		printf("cy = %d\n", cy); // Center point Y of circle // Point = (X,Y)
-		printf("cr = %d\n", cr); // Radius of the circle
+		obj_parameter p;
+		p.height = h;
+		p.width = w;
+		p.radius = cr;
+		p.diameter = d;
 
-		//DImensions of Rectangle. x and y are the starting point on the top left of the rectangle
-		//h and w are the length and width of the rectangle
-		printf("x = %d\n", x);
-		printf("y = %d\n", y);
-		printf("h = %d\n", h);
-		printf("w = %d\n", w);
-		return d;
-	}
+		printf("Height of sign: %d\n", p.height);
+		printf("Width of sign: %d\n", p.width);
+		printf("Radius of sign: %d\n", p.radius);
+		printf("Diameter of sign: %d\n", p.diameter);
+		
+		return p;
+	}	
 }
 
-//TODO Function to detect Rectangle//
+// Function to detect Rectangle//
 
-void detect_Rectangle(Mat ROI)
+obj_parameter detect_Rectangle(Mat ROI, Mat gray, Mat canny)
 {
-	cv::Mat canny;
+	obj_parameter p;
 	cvtColor(ROI, gray, COLOR_BGR2GRAY);
 	cv::Canny(gray, canny, 0, 50, 5);
 
@@ -121,13 +155,6 @@ void detect_Rectangle(Mat ROI)
 		if (std::fabs(cv::contourArea(contours[i])) < 100 || !cv::isContourConvex(approx))
 			continue;
 
-		/*if (approx.size() == 3)
-		{
-			approx.size() == 3;
-			setLabel(ROI, "TRIANGLE", contours[i]);    // Triangles
-			printf("Triangle detected\n");
-		}*/
-		
 		else if (approx.size() >= 4 && approx.size() <= 6)
 		{
 			// Number of vertices of polygonal curve
@@ -141,85 +168,83 @@ void detect_Rectangle(Mat ROI)
 			}
 		}
 	}
+	return p;
 }
 
 //Function to detect color//
 
-void color_detect(Mat ROI, Mat HSV, Mat Threshold)
+obj_parameter color_detect(Mat ROI, Mat HSV, Mat Threshold)
 {
-	int LH, LS, LV, HH, HS, HV;
+	obj_parameter p;
 	cout << "Enter the value of H Parameter, Low Hue:";
-	cin >> LH;
-	cout << "Enter the value of S Parameter, Low Saturation:";
-	cin >> LS;
-	cout << "Enter the value of V Parameter, Low Value:";
-	cin >> LV;
+	cin >> p.LH;
 	cout << "Enter the value of H Parameter, High Hue:";
-	cin >> HH;
-	cout << "Enter the value of S Parameter, High Saturation:";
-	cin >> HS;
-	cout << "Enter the value of V Parameter, High Value:";
-	cin >> HV;
-	cvtColor(ROI, HSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-
-	inRange(HSV, Scalar(LH,LS, LV), Scalar(HH, HS, HV),	Threshold); //Threshold the image
+	cin >> p.HH;
+	cvtColor(ROI, HSV, COLOR_BGR2HSV);
+	inRange(HSV, Scalar(150, 0, 0), Scalar(180, 255, 255), Threshold);
 
 }
 
+// Main Function. Requires 2 Parameters//
+//
 int main(int argc, char* argv[])
 {
-	if (argc > 3)
+	if (argc > 4)
 	{
 		printf("Too many arguments\n");
-		return 1;
-	}
-
-	int num = atoi(argv[1]);
-	int color = atoi(argv[2]);
-
-	src = imread("C:/Users/sriva/source/repos/face_detection/face_detection/img/img/147.png");
-	if (src.empty())
-	{
-		printf("Image not loaded\n");
 		return -1;
 	}
+	obj_parameter p;
+	p.num = atoi(argv[1]); //Based on Shape
+	p.color = atoi(argv[2]); // Based on Color
+	String img(argv[3]);
+	src = imread(img, IMREAD_COLOR);
 
-	while (1) 
+	//TODO:- Take images from command line
+	//src = imread("C:/Users/sriva/source/repos/face_detection/face_detection/img/img/146.png");
+	if (src.empty())
+	{
+		printf("image not loaded. BREAK");
+	}
+	while (true)
 	{
 		create_ROI(src);
-		if (num == 1)
+		if (p.num == 1)
 		{
-			cout << detect_circle(ROI);
-			if (color == 1)
-			{
-				color_detect(ROI, HSV, Threshold);
-				printf("Color_thresholded. Image window opened\n");
-			}
-			else
-			{
-				printf("Wrong parameter. Please Check Again.");
-			}
+			detect_circle(ROI, gray);
 			printf("Circle Detected_Function Called\n");
 		}
-		else if (num == 2);
+		else if (p.num == 2)
 		{
-			detect_Rectangle(ROI);
-			if (color == 2)
-			{
-				color_detect(ROI, HSV, Threshold);
-				printf("Color_thresholded. Image window opened\n");
-			}
-			else
-			{
-				printf("Wrong parameter. Please Check Again.");
-			}
-		}		
+			detect_Rectangle(ROI, gray, canny);
+			printf("Rectangle Detected_Function Called\n");
+		}
+		else
+		{
+			printf("Invalid Arguments\n");
+		}
+		if (p.color == 1)
+		{
+			//color_detect(ROI, HSV, Threshold);
+			printf("Color Red Detected\n");
+		}
+		else
+		{
+			printf("Invalid Color Arguments\n");
+		}
+		//create Window
+		namedWindow("Input", WINDOW_AUTOSIZE);
+		namedWindow("cropped", WINDOW_AUTOSIZE);
+		namedWindow("HSV", WINDOW_AUTOSIZE);
+		namedWindow("color detect", WINDOW_AUTOSIZE);
 		// Show in a window
 		imshow("Input", src);
-		imshow("cropped", ROI);
-		imshow("Threshold", Threshold);
+		imshow("cropped",ROI);
+		imshow("HSV", HSV);
+		imshow("color detect", Threshold);
 		cv::waitKey(0);
-		return 0;
-	}
+	}		
+	return 0;
 }
+
 
