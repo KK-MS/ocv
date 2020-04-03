@@ -64,7 +64,8 @@ typedef struct packet {
 	unsigned int  u4_timestampH;       //< Timestamp High bytes to sync the data
 	float         u4_ins_confidence;   //< INS GPS coordinates confidence/Satellite
 	//float         u4_ins_reserved1;    //< Reserved for future
-	float         u4_ins_TSign_ds;     //< Reserved for future
+	//float         u4_ins_TSign_ds;     //< Reserved for future
+	float         u4_ins_cm_d2l;     //< Reserved for future
 	float         u4_ins_latitude;     //< INS latitude
 	float         u4_ins_longitude;    //< INS longitude
 	float         u4_ins_elevation;    //< INS elevation [Optional]
@@ -78,7 +79,7 @@ typedef struct packet {
 	unsigned int  u4_frame_resolution; //< Image resolution
 	unsigned int  u4_frame_type;       //< JPEG, etc.
 	unsigned int  u4_frame_reserved2;  //< Reserved
-    unsigned int  u4_frame_cm_range;   //< Reserved
+    //unsigned int  u4_frame_cm_range;   //< Reserved
 	
 	// TBD Atlatec other info
 	// TBD Ground truth. Lane info, landmark info
