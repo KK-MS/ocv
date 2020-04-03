@@ -135,7 +135,7 @@ obj_parameter detect_circle(Mat ROI, Mat gray)
 
 // Function to detect Rectangle//
 
-obj_parameter detect_Rectangle(Mat ROI, Mat gray, Mat canny)
+void detect_Rectangle(Mat ROI, Mat gray, Mat canny)
 {
 	obj_parameter p;
 	cvtColor(ROI, gray, COLOR_BGR2GRAY);
@@ -168,11 +168,9 @@ obj_parameter detect_Rectangle(Mat ROI, Mat gray, Mat canny)
 			}
 		}
 	}
-	return p;
 }
 
-//Function to detect color//
-
+/*
 obj_parameter color_detect(Mat ROI, Mat HSV, Mat Threshold)
 {
 	obj_parameter p;
@@ -184,7 +182,7 @@ obj_parameter color_detect(Mat ROI, Mat HSV, Mat Threshold)
 	inRange(HSV, Scalar(150, 0, 0), Scalar(180, 255, 255), Threshold);
 
 }
-
+*/
 // Main Function. Requires 2 Parameters//
 //
 int main(int argc, char* argv[])
@@ -225,8 +223,16 @@ int main(int argc, char* argv[])
 		}
 		if (p.color == 1)
 		{
+			cvtColor(ROI, HSV, COLOR_BGR2HSV);
+			inRange(HSV, Scalar(150, 0, 0), Scalar(180, 255, 255), Threshold);
 			//color_detect(ROI, HSV, Threshold);
 			printf("Color Red Detected\n");
+		}
+		else if (p.color == 2)
+		{
+			cvtColor(ROI, HSV, COLOR_BGR2HSV);
+			inRange(HSV, Scalar(20, 0, 0), Scalar(30, 255, 255), Threshold);
+			printf("Color Yellow Detected\n");
 		}
 		else
 		{
