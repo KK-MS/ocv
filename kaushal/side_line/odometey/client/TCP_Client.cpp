@@ -28,6 +28,7 @@ int main(int argc , char *argv[])
   
 	int send_size;
 	int read_size;
+	char info[] = "ODO";
   
 	printf("\nInitialising Winsock...");
   
@@ -51,7 +52,7 @@ int main(int argc , char *argv[])
 	// assign the address to scoket
 	client.sin_addr.s_addr = inet_addr("127.0.0.1");
 	client.sin_family = AF_INET;
-	client.sin_port = htons( 8888 );
+	client.sin_port = htons( 8889 );
   
 	//Connect to remote server
 	if (connect(sock, (struct sockaddr *)&client , sizeof(client)) < 0)
@@ -64,6 +65,19 @@ int main(int argc , char *argv[])
 	puts("\nConnected.");
 	fflush(stdout);
 
+#if 1
+
+		//send the CM_METADAT to NXP_Server fro Frame processing
+		send_size = send(sock, info, sizeof(info) , 0);
+		
+		if(send_size == -1){
+			printf("\n***Error in sending request for Lane information: [%d] : %s, [%d]\n", errno, strerror(errno), send_size);
+			return -1;
+		}
+
+		printf("send Size: %d\n", send_size);
+#endif
+
 	/*Receive METADATA from Server */
 	
 	netrx ptrCliNet;
@@ -71,18 +85,16 @@ int main(int argc , char *argv[])
 	// Packet structure define
     PACKET *ptr_metadata = (PACKET *) &(ptrCliNet.stPacket);	
 	
-	FILE* file = fopen("Mockup_Data_CM_TS.csv", "a");
+	FILE* file = fopen("Mockup_Data_CM_D2L.csv", "a");
 
-	fprintf(file,"Time(S), Latitude, Longitude, CM_D2TS\n");
+	fprintf(file,"Time(S), Latitude, Longitude, CM_D2L, New_Lat, New_lon\n");
 	
 	fclose(file);
 	
     while(1)
     {
-		file = fopen("Mockup_Data_CM_TS.csv", "a");
+		file = fopen("Mockup_Data_CM_D2L.csv", "a");
 
-	    //fprintf(file,"frame, D2L(mm)\n");
-	 
 	    //  APO -> NXP_server : CM Data
         read_size = recv(sock, (char *)ptr_metadata, sizeof(PACKET), 0);
         if (read_size < 0) {
@@ -101,10 +113,12 @@ int main(int argc , char *argv[])
 		printf("\nTimeL: %f\n",ptr_metadata->u4_timestampL);
 		printf("lat: %f\n", ptr_metadata->u4_ins_latitude);
 		printf("lon: %f\n", ptr_metadata->u4_ins_longitude);
-		printf("CM_D2L: %f\n", ptr_metadata->u4_ins_TSign_ds);	
+		printf("CM_D2L: %f\n", ptr_metadata->u4_ins_cm_d2l);	
+		printf("New_lat: %f\n", ptr_metadata->u4_out_odo_latitude);
+	    printf("New_lon: %f\n", ptr_metadata->u4_out_odo_longitude);
 	
 		// Write the process METADATA in .csv file
-		fprintf(file,"%f, %f, %f, %f\n", ptr_metadata->u4_timestampL, ptr_metadata->u4_ins_latitude, ptr_metadata->u4_ins_longitude, ptr_metadata->u4_ins_TSign_ds);
+		fprintf(file,"%f, %f, %f, %f, %f, %f\n", ptr_metadata->u4_timestampL, ptr_metadata->u4_ins_latitude, ptr_metadata->u4_ins_longitude, ptr_metadata->u4_ins_cm_d2l, ptr_metadata->u4_out_odo_latitude, ptr_metadata->u4_out_odo_longitude);
 		
 		fclose(file);
     }
