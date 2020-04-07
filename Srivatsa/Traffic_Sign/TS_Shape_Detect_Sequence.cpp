@@ -1,32 +1,13 @@
-#include <iostream>.
-#include "opencv2/opencv.hpp"
+#include <iostream>
 #include <stdio.h>
+
+#include "opencv2/opencv.hpp"
+
 using namespace std;
 using namespace cv;
-char imgName[50];
-Mat src;
-Mat img;
-Mat ROI;
-Mat gray;
-Mat canny;
-Mat HSV;
-Mat Threshold;
-//Function to set labels in images//
 
-void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& contour)
-{
-	int fontface = cv::FONT_HERSHEY_SIMPLEX;
-	double scale = 0.4;
-	int thickness = 2;
-	int baseline = 0;
-
-	cv::Size text = cv::getTextSize(label, fontface, scale, thickness, &baseline);
-	cv::Rect r = cv::boundingRect(contour);
-
-	cv::Point pt(r.x + ((r.width - text.width) / 2), r.y + ((r.height + text.height) / 2));
-	cv::rectangle(im, pt + cv::Point(0, baseline), pt + cv::Point(text.width, -text.height), CV_RGB(255, 255, 255), 1);
-	cv::putText(im, label, pt, fontface, scale, CV_RGB(1, 1, 1), thickness, 8);
-}
+RNG rng(12345);
+Mat src, img,ROI, gray, canny, HSV, Threshold;
 
 //STructure to obtain parameters of the sign//
 
@@ -47,8 +28,6 @@ struct obj_parameter
 	double img_lat;
 	double img_long;
 	double img_bearing;
-	//Image Matrices
-	
 	//ROI Parameters//
 	int a;
 	int b;
@@ -59,13 +38,31 @@ struct obj_parameter
 	int width;
 	int radius; // only for circle
 	int diameter; // only for circle
+	float distance;
 	//Color Parameters
 	int LH;
 	int HH;
 };
 
-//Function to create ROI TODO
-void create_ROI(cv::Mat src)
+//Function to set labels in images//
+
+void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& contour)
+{
+	int fontface = cv::FONT_HERSHEY_SIMPLEX;
+	double scale = 0.4;
+	int thickness = 2;
+	int baseline = 0;
+
+	cv::Size text = cv::getTextSize(label, fontface, scale, thickness, &baseline);
+	cv::Rect r = cv::boundingRect(contour);
+
+	cv::Point pt(r.x + ((r.width - text.width) / 2), r.y + ((r.height + text.height) / 2));
+	cv::rectangle(im, pt + cv::Point(0, baseline), pt + cv::Point(text.width, -text.height), CV_RGB(255, 255, 255), 1);
+	cv::putText(im, label, pt, fontface, scale, CV_RGB(1, 1, 1), thickness, 8);
+}
+/*
+Function to create ROI TODO
+void create_ROI(cv::Mat frame)
 {
 	obj_parameter p;
 	cout << "Enter the value of top left x coordinate:";
@@ -79,7 +76,7 @@ void create_ROI(cv::Mat src)
 	Rect2i box(p.a, p.b, p.c, p.d);
 	ROI = src(box);
 }
-
+*/
 //Function to detect circle//
 obj_parameter detect_circle(Mat ROI, Mat gray)
 {
@@ -123,14 +120,14 @@ obj_parameter detect_circle(Mat ROI, Mat gray)
 		p.width = w;
 		p.radius = cr;
 		p.diameter = d;
-
-		printf("Height of sign: %d\n", p.height);
+		p.distance = (0.58 * 1512) / p.width;
+		printf("\nHeight of sign: %d\n", p.height);
 		printf("Width of sign: %d\n", p.width);
 		printf("Radius of sign: %d\n", p.radius);
 		printf("Diameter of sign: %d\n", p.diameter);
-		
+		printf("Distance to sign: %f\n", p.distance);
 		return p;
-	}	
+	}
 }
 
 // Function to detect Rectangle//
@@ -163,50 +160,44 @@ void detect_Rectangle(Mat ROI, Mat gray, Mat canny)
 			if (vtc == 4)
 			{
 				setLabel(ROI, "RECTANGLE", contours[i]);
-				printf("contours_size = %d", contours[i]);
+				printf("contours_size = %f", contours[i]);
 				printf("Rectangle Detected\n");
 			}
 		}
 	}
 }
 
-/*
-obj_parameter color_detect(Mat ROI, Mat HSV, Mat Threshold)
-{
-	obj_parameter p;
-	cout << "Enter the value of H Parameter, Low Hue:";
-	cin >> p.LH;
-	cout << "Enter the value of H Parameter, High Hue:";
-	cin >> p.HH;
-	cvtColor(ROI, HSV, COLOR_BGR2HSV);
-	inRange(HSV, Scalar(150, 0, 0), Scalar(180, 255, 255), Threshold);
 
-}
-*/
-// Main Function. Requires 2 Parameters//
-//
 int main(int argc, char* argv[])
 {
+	obj_parameter p;
 	if (argc > 4)
 	{
 		printf("Too many arguments\n");
 		return -1;
 	}
-	obj_parameter p;
 	p.num = atoi(argv[1]); //Based on Shape
 	p.color = atoi(argv[2]); // Based on Color
-	String img(argv[3]);
-	src = imread(img, IMREAD_COLOR);
-
-	//TODO:- Take images from command line
-	//src = imread("C:/Users/sriva/source/repos/face_detection/face_detection/img/img/146.png");
-	if (src.empty())
+	int iFrameCount = 0;
+	int i = 0;
+	//float distance;
+	// Load the image files from folder in sequence
+	vector<cv::String> fn;
+	glob("C:/Users/sriva/source/repos/Traffic_Sign_Detection/img/*.png", fn, false);	
+	while (1) 
 	{
-		printf("image not loaded. BREAK");
-	}
-	while (true)
-	{
-		create_ROI(src);
+		// Load the frame to process
+		src = imread(fn[iFrameCount].c_str(), IMREAD_COLOR);
+		printf("\nfile: %s", fn[iFrameCount].c_str());
+		// If the frame is empty, break immediately
+		if (src.empty())
+		{
+			printf("Frame not loaded. Breaking");
+		}
+		//create_ROI(src);
+		//cv::resize(src, src, Size(640, 360));
+		Rect const box(640, 0, 640, 360);
+		ROI = src(box);
 		if (p.num == 1)
 		{
 			detect_circle(ROI, gray);
@@ -225,32 +216,39 @@ int main(int argc, char* argv[])
 		{
 			cvtColor(ROI, HSV, COLOR_BGR2HSV);
 			inRange(HSV, Scalar(150, 0, 0), Scalar(180, 255, 255), Threshold);
-			//color_detect(ROI, HSV, Threshold);
 			printf("Color Red Detected\n");
 		}
 		else if (p.color == 2)
 		{
 			cvtColor(ROI, HSV, COLOR_BGR2HSV);
 			inRange(HSV, Scalar(20, 0, 0), Scalar(30, 255, 255), Threshold);
-			printf("Color Yellow Detected\n");
 		}
 		else
 		{
 			printf("Invalid Color Arguments\n");
 		}
-		//create Window
+		waitKey(100);
+
+
+		// to create the filenames in sequence for save the process frames
+		std::stringstream ss;
+		ss << "C:/Users/sriva/source/repos/Traffic_Sign_Detection/img/frame_" << i << ".png";
+
+		// Save the Process frame on device
+		//imwrite(ss.str().c_str(), src);
 		namedWindow("Input", WINDOW_AUTOSIZE);
-		namedWindow("cropped", WINDOW_AUTOSIZE);
-		namedWindow("HSV", WINDOW_AUTOSIZE);
-		namedWindow("color detect", WINDOW_AUTOSIZE);
-		// Show in a window
 		imshow("Input", src);
-		imshow("cropped",ROI);
-		imshow("HSV", HSV);
-		imshow("color detect", Threshold);
-		cv::waitKey(0);
-	}		
+
+		char c = (char)waitKey(100);  // Press any KEY on Keyboard to continue
+		if (c == 27) break;		    // Press ESC to exit
+
+		iFrameCount++;
+		i++;
+	}
+	
+
+	// Closes all the frames
+	destroyAllWindows();
+
 	return 0;
 }
-
-
