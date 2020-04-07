@@ -40,9 +40,10 @@
 #define CM_FRAME_SIZE  (CM_VDS_FRAME_WIDTH * CM_VDS_FRAME_HEIGHT * 3)
 
 using namespace std;
+using namespace cv;
 
 /* Function declaration */
-//int process_data(netrx* ptrCliNet, char* ptr_frame_buf, int height, int width);
+int process_data(netrx* ptrCliNet, char* ptr_frame_buf, int height, int width);
 
 /*
  ** get_data_stream_process
@@ -89,22 +90,23 @@ int get_data_stream_process(netrx* ptrCliNet)
 	printf("lon: %f\n", ptr_metadata->u4_ins_longitude);
 	printf("CM_D2L: %f\n", ptr_metadata->u4_ins_cm_d2l);
 
-#if 0
 	//  APO -> NXP_server : CM_VDS_Frame
 	for (len = 0; len < ImgLen; len += res) {
 
-		if ((res = recv(socket_desc, img + len, ImgLen - len, 0)) < 0) {
+		res = recv(socket_desc, (char*)img, ImgLen, 0);
+		if (res  < 0)
+		{
 			printf("VDS: Socket Reading Failure\n");
 			free(img);
 			break;
 		}
 	}
 	printf("\nReceive size: %d\n", len);
-
+	
 	// TODO process function outside of this function
 	// Processing the receive CM_VDS Farme (D2L)
-	//process_data(ptrCliNet, img, height, width);
-#endif
+	process_data(ptrCliNet, img, height, width);
+	
 	return 0;
 }
 
@@ -153,7 +155,7 @@ int get_gt_sidelane_info(netrx* ptrCliNet)
 	printf("New_lon: %f\n", ptr_metadata->u4_out_odo_longitude);
 
 	// send New_position to Odo_client
-	send_size = send(ptrCliNet->sock_desc_odo, (char*)ptr_metadata, sizeof(PACKET), 0);
+	send_size = send(ptrCliNet->sock_desc_odo, (char *)ptr_metadata, sizeof(PACKET), 0);
 	if (send_size == -1) {
 		printf("***Error in sending Request for MetaData: [%d] : %s\n"
 			, errno, strerror(errno));
@@ -199,11 +201,12 @@ int run_app(netrx* ptrCliNet)
 		}
 
 		// TODO Process function here
-
+#if 1
 		// car position (GPS) Correction
 		if ((ret = get_gt_sidelane_info(ptrCliNet)) < 0) {
 			return ret;
 		}
+#endif
 
 	} // loop
 

@@ -87,7 +87,7 @@ int main(int argc , char *argv[])
 	
 	FILE* file = fopen("Mockup_Data_CM_D2L.csv", "a");
 
-	fprintf(file,"Time(S), Latitude, Longitude, CM_D2L, New_Lat, New_lon\n");
+	fprintf(file,"Time(S), Latitude, Longitude, CM_D2L, ODO_D2L, New_Lat, New_lon\n");
 	
 	fclose(file);
 	
@@ -116,9 +116,10 @@ int main(int argc , char *argv[])
 		printf("CM_D2L: %f\n", ptr_metadata->u4_ins_cm_d2l);	
 		printf("New_lat: %f\n", ptr_metadata->u4_out_odo_latitude);
 	    printf("New_lon: %f\n", ptr_metadata->u4_out_odo_longitude);
-	
+	    printf("New_lon: %f\n", ptr_metadata->u4_odo_distance);
+		
 		// Write the process METADATA in .csv file
-		fprintf(file,"%f, %f, %f, %f, %f, %f\n", ptr_metadata->u4_timestampL, ptr_metadata->u4_ins_latitude, ptr_metadata->u4_ins_longitude, ptr_metadata->u4_ins_cm_d2l, ptr_metadata->u4_out_odo_latitude, ptr_metadata->u4_out_odo_longitude);
+		fprintf(file,"%f, %f, %f, %f, %f, %f, %f\n", ptr_metadata->u4_timestampL, ptr_metadata->u4_ins_latitude, ptr_metadata->u4_ins_longitude, ptr_metadata->u4_ins_cm_d2l, ptr_metadata->u4_odo_distance, ptr_metadata->u4_out_odo_latitude, ptr_metadata->u4_out_odo_longitude);
 		
 		fclose(file);
     }

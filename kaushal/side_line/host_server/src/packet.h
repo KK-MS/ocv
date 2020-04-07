@@ -85,7 +85,8 @@ typedef struct packet {
 	// TBD Ground truth. Lane info, landmark info
 
 	// Odometry
-	float  u4_odo_vhcl_yaw;  //< Odometry calculated distance
+	float  u4_odo_distance;  //< Odometry calculated distance
+	//float  u4_odo_vhcl_yaw;  //< Odometry calculated distance
 	float  u4_odo_angle;     //< Relative object angle
 	float  u4_odo_reserved1; //< Reserved
 	float  u4_odo_reserved2; //< Reserved

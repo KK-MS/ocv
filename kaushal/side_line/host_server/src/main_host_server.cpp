@@ -67,7 +67,7 @@ int connect_clients(netrx* ptrCliNet)
 		printf("Error in process_request: no.:[%d] %s\n", errno, strerror(errno));
 		return -1;
 	}
-
+#if 1
 	// accept GT client
 	socket_desc = accept_client(ptrCliNet);
 	if (socket_desc < 0) {
@@ -81,7 +81,8 @@ int connect_clients(netrx* ptrCliNet)
 	  printf("Error in process_request: no.:[%d] %s\n", errno, strerror(errno));
 	  return -1;
 	}
-
+#endif
+	
 	//return 0;
 	return socket_desc;
 }
@@ -160,9 +161,9 @@ int main(int argc , char *argv[])
 	//serverIP_gt = argv[3];
 	//port_gt = atoi(argv[4]);
 
-	process_start_x = 420;			    // atoi(argv[5]);
-	process_start_y = 512,			    // atoi(argv[6]);
-	Process_end_y = 512;                // atoi(argv[7]);
+	process_start_x = 512;			    // atoi(argv[5]);
+	process_start_y = 215,			    // atoi(argv[6]);
+	Process_end_y = 215;                // atoi(argv[7]);
 	process_lanepixel_count = 15;       // atoi(argv[8]);
 	process_lanecolor_threshold = 250;  // atoi(argv[9]);
 
@@ -173,11 +174,11 @@ int main(int argc , char *argv[])
 	//cliNet.port = port;
 	//cliNet.port_gt = port_gt;
 
-	//cliNet.istart_x = process_start_x;
-	//cliNet.istart_y = process_start_y;
-	//cliNet.iend_y = Process_end_y;
-	//cliNet.iLanePixelThreshold = process_lanepixel_count;
-	//cliNet.iLaneColorUpperThreshold = process_lanecolor_threshold;
+	cliNet.istart_x = process_start_x;
+	cliNet.istart_y = process_start_y;
+	cliNet.iend_y = Process_end_y;
+	cliNet.iLanePixelThreshold = process_lanepixel_count;
+	cliNet.iLaneColorUpperThreshold = process_lanecolor_threshold;
 
 	//cliNet.vd_filename = video_filename;
 
