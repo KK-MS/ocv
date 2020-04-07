@@ -61,6 +61,8 @@ int get_data_stream_process(netrx* ptrCliNet)
 	int len = 0;
 	int res = 0;
 
+  // TODO before thw while loop
+  // Everytime malloca is created.
 	char* img = (char*)malloc(ImgLen);
 
 	// TODO Rename the sock_desc_gt_bridge to input data
@@ -69,7 +71,7 @@ int get_data_stream_process(netrx* ptrCliNet)
 
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptrCliNet->stPacket);
-	
+
 	//  APO -> NXP_server : CM Data
 	read_size = recv(socket_desc, (char*)ptr_metadata, sizeof(PACKET), 0);
 	if (read_size < 0) {
@@ -102,11 +104,11 @@ int get_data_stream_process(netrx* ptrCliNet)
 		}
 	}
 	printf("\nReceive size: %d\n", len);
-	
+
 	// TODO process function outside of this function
 	// Processing the receive CM_VDS Farme (D2L)
 	process_data(ptrCliNet, img, height, width);
-	
+
 	return 0;
 }
 
@@ -154,7 +156,7 @@ int get_gt_sidelane_info(netrx* ptrCliNet)
 	printf("New_lat: %f\n", ptr_metadata->u4_out_odo_latitude);
 	printf("New_lon: %f\n", ptr_metadata->u4_out_odo_longitude);
 
-	// send New_position to Odo_client
+	// TODO: send New_position to Odo_client
 	send_size = send(ptrCliNet->sock_desc_odo, (char *)ptr_metadata, sizeof(PACKET), 0);
 	if (send_size == -1) {
 		printf("***Error in sending Request for MetaData: [%d] : %s\n"
@@ -196,11 +198,23 @@ int run_app(netrx* ptrCliNet)
 
 		fflush(stdin);
 
+
+    // Step-1: It receives the input data (IMU + Images),
+    // Step-2: Odometry pass IMU data to Ground truth and get the Sidelane/Traffic sign details.
+    // Step-3: Odometry calculates the Region of Interst from IMU Lat-Long-bearing and GT Lat-long
+    // Step-4: Odometry calculates teh distance of the intersted object/lane
+    // Step-5: Odometry calculates the current position from Distane and GT Lat-long.
+    // Step-6: Odometry passt the calculated value to the application.
+
+    // Get IMU + Image data,
+    // Do images processing to find the distance.
+    // TODO: Image processed after knowing GT details
 		if ((ret = get_data_stream_process(ptrCliNet)) < 0) {
 			return ret;
 		}
 
-		// TODO Process function here
+		// TODO Call Image Processing function with obtained GT details
+
 #if 1
 		// car position (GPS) Correction
 		if ((ret = get_gt_sidelane_info(ptrCliNet)) < 0) {
