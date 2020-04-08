@@ -88,6 +88,46 @@ int connect_clients(netrx* ptrCliNet)
 }
 
 /*
+ ** init
+ **
+ ** initialize the variables / Memory allocations
+ */
+int init(netrx* ptrCliNet)
+{
+	// Packet structure define
+	PACKET* ptr_metadata = (PACKET*) & (ptrCliNet->stPacket);
+
+	char* frame_buf = (char*)malloc(ptrCliNet->ImgLen);
+	ptrCliNet->img = frame_buf;
+
+	// For add the logo to main Frame to display
+	const String logo = "./ADrive_Logo1.png";
+	Mat mlogo = imread(logo, IMREAD_COLOR);
+
+	// Resize the logo
+	cv::resize(mlogo, ptrCliNet->mat_logo, Size(135, 50));
+
+	// For Saving the process frames as video
+	//const String name = ptrCliNet->vd_filename;
+
+	//ptrCliNet->wrOutVideo.open(name, CV_FOURCC('M', 'J', 'P', 'G'), 10.0, Size(WIDTH, HEIGHT), true);
+
+	return 0;
+}
+
+/*
+ ** DeInit
+ **
+ ** De-initialize the variables / Memory allocations
+ */
+int DeInit(netrx* ptrCliNet)
+{
+	free(ptrCliNet->img);
+
+	return 0;
+}
+
+/*
  ** side_lane_application
  **
  ** connect and Receive the frames & MAPDATA from CM_APO Client
@@ -107,8 +147,8 @@ int side_lane_application(netrx* ptrCliNet)
     return ret;
   }
 
-  // TODO: do all the Init / preparations
-	// e.g. memory allocation: char* img = (char*)malloc(ImgLen);
+  // Init / preparations
+  init(ptrCliNet);
 
   // receiving the Frames & MAPDATA from VD_GT_Server
   // loops until terminated or error in processing
@@ -122,8 +162,8 @@ int side_lane_application(netrx* ptrCliNet)
 
   printf("\n@END: Received new Position...Status:%d\n", ret);
 
-  // DeInit
   // We can free the resources, e.g. allocated memory
+  DeInit(ptrCliNet);
 
   return 0;
 }
@@ -167,9 +207,9 @@ int main(int argc , char *argv[])
   //serverIP_gt = argv[3];
   //port_gt = atoi(argv[4]);
 
-  process_start_x = 512;			    // atoi(argv[5]);
-  process_start_y = 215,			    // atoi(argv[6]);
-                  Process_end_y = 215;                // atoi(argv[7]);
+  process_start_x = 512;			  // atoi(argv[5]);
+  process_start_y = 215,			  // atoi(argv[6]);
+  Process_end_y = 215;                // atoi(argv[7]);
   process_lanepixel_count = 15;       // atoi(argv[8]);
   process_lanecolor_threshold = 250;  // atoi(argv[9]);
 
@@ -190,9 +230,6 @@ int main(int argc , char *argv[])
 
   // Start the application
   side_lane_application(&cliNet);
-
-
-
 
   //closesocket(socket_desc);
   //WSACleanup();

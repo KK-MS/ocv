@@ -32,7 +32,7 @@ int main(int argc , char *argv[])
 
   int send_size;
   int read_size;
-  char info[] = "ODO";
+  char info[] = "APP";
 
   printf("\nInitialising Winsock...");
 

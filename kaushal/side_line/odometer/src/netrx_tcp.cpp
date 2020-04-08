@@ -34,11 +34,6 @@
 
 #pragma warning(disable:4996)
 
-#define CM_VDS_FRAME_WIDTH  (640)
-#define CM_VDS_FRAME_HEIGHT (480)
-
-#define CM_FRAME_SIZE  (CM_VDS_FRAME_WIDTH * CM_VDS_FRAME_HEIGHT * 3)
-
 using namespace std;
 using namespace cv;
 
@@ -50,29 +45,20 @@ int process_data(netrx* ptrCliNet, char* ptr_frame_buf, int height, int width);
  **
  ** Getting the CarMaker Streamimg METADATA & FRAMEDATA & processing(D2L) it.
  */
-int get_data_stream_process(netrx* ptrCliNet)
+int get_data_stream(netrx* ptrCliNet)
 {
 	int socket_desc;
 	int read_size;
 
-	int width = CM_VDS_FRAME_WIDTH;
-	int height = CM_VDS_FRAME_HEIGHT;
-	int ImgLen = CM_FRAME_SIZE;
 	int len = 0;
 	int res = 0;
 
-  // TODO before thw while loop
-  // Everytime malloca is created.
-	char* img = (char*)malloc(ImgLen);
-
-	// TODO Rename the sock_desc_gt_bridge to input data
-
-	socket_desc = ptrCliNet->sock_desc_gt_bridge;
+    socket_desc = ptrCliNet->sock_desc_input_data;
 
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptrCliNet->stPacket);
 
-	//  APO -> NXP_server : CM Data
+	//  APO -> Odometer : CM Data
 	read_size = recv(socket_desc, (char*)ptr_metadata, sizeof(PACKET), 0);
 	if (read_size < 0) {
 		printf("***Error in Receiving MetaData: [%d] : %s\n"
@@ -92,22 +78,18 @@ int get_data_stream_process(netrx* ptrCliNet)
 	printf("lon: %f\n", ptr_metadata->u4_ins_longitude);
 	printf("CM_D2L: %f\n", ptr_metadata->u4_ins_cm_d2l);
 
-	//  APO -> NXP_server : CM_VDS_Frame
-	for (len = 0; len < ImgLen; len += res) {
+	//  APO -> Odometer : CM_VDS_Frame
+	for (len = 0; len < ptrCliNet->ImgLen; len += res) {
 
-		res = recv(socket_desc, (char*)img, ImgLen, 0);
+		res = recv(socket_desc, (char *)ptrCliNet->img, ptrCliNet->ImgLen, 0);
 		if (res  < 0)
 		{
 			printf("VDS: Socket Reading Failure\n");
-			free(img);
+			free(ptrCliNet->img);
 			break;
 		}
 	}
 	printf("\nReceive size: %d\n", len);
-
-	// TODO process function outside of this function
-	// Processing the receive CM_VDS Farme (D2L)
-	process_data(ptrCliNet, img, height, width);
 
 	return 0;
 }
@@ -151,13 +133,29 @@ int get_gt_sidelane_info(netrx* ptrCliNet)
 
 	printf("read_size:%d\n", read_size);
 
-	// |TODO get the side lane co-ordinates also
 	// Display the corrected car Position Co-ordinates
 	printf("New_lat: %f\n", ptr_metadata->u4_out_odo_latitude);
 	printf("New_lon: %f\n", ptr_metadata->u4_out_odo_longitude);
 
-	// TODO: send New_position to Odo_client
-	send_size = send(ptrCliNet->sock_desc_odo, (char *)ptr_metadata, sizeof(PACKET), 0);
+	return 0;
+}
+
+/*
+ ** application_info
+ **
+ ** Send the new car position with Updated METADATA Packet to application.
+ ** For the Analysis or use in other applications.
+ */
+int application_info(netrx* ptrCliNet)
+{
+	int send_size;
+	int read_size;
+
+	// Packet structure define
+	PACKET* ptr_metadata = (PACKET*) & (ptrCliNet->stPacket);
+
+	// Send car new_position to Application
+	send_size = send(ptrCliNet->sock_desc_app, (char*)ptr_metadata, sizeof(PACKET), 0);
 	if (send_size == -1) {
 		printf("***Error in sending Request for MetaData: [%d] : %s\n"
 			, errno, strerror(errno));
@@ -178,46 +176,47 @@ int get_gt_sidelane_info(netrx* ptrCliNet)
 int run_app(netrx* ptrCliNet)
 {
 	int ret = 0;
-
-	//printf("\nRun_App\n");
-
-	// For add the logo to main Frame to display
-	const String logo = "./ADrive_Logo1.png";
-	Mat mlogo = imread(logo, IMREAD_COLOR);
-
-	// Resize the logo
-	cv::resize(mlogo, ptrCliNet->mat_logo, Size(135, 50));
-
-	// For Saving the process frames as video
-	//const String name = ptrCliNet->vd_filename;
-
-	//ptrCliNet->wrOutVideo.open(name, CV_FOURCC('M', 'J', 'P', 'G'), 10.0, Size(WIDTH, HEIGHT), true);
-
+		
 	// Receiving the METADATA & FRAMEDATA from CM_APO
 	while (1) {
 
 		fflush(stdin);
 
-
-    // Step-1: It receives the input data (IMU + Images),
-    // Step-2: Odometry pass IMU data to Ground truth and get the Sidelane/Traffic sign details.
-    // Step-3: Odometry calculates the Region of Interst from IMU Lat-Long-bearing and GT Lat-long
-    // Step-4: Odometry calculates teh distance of the intersted object/lane
-    // Step-5: Odometry calculates the current position from Distane and GT Lat-long.
-    // Step-6: Odometry passt the calculated value to the application.
-
-    // Get IMU + Image data,
-    // Do images processing to find the distance.
-    // TODO: Image processed after knowing GT details
-		if ((ret = get_data_stream_process(ptrCliNet)) < 0) {
+		// Step-1: It receives the input data (IMU + Images),
+		// Get IMU + Image data,
+		if ((ret = get_data_stream(ptrCliNet)) < 0) {
 			return ret;
 		}
 
-		// TODO Call Image Processing function with obtained GT details
-
 #if 1
+		// Step-2: Odometry pass IMU data to Ground truth and get the Sidelane/Traffic sign details.
 		// car position (GPS) Correction
 		if ((ret = get_gt_sidelane_info(ptrCliNet)) < 0) {
+			return ret;
+		}
+#endif
+
+		// Step-3: Odometry calculates the Region of Interst from IMU Lat-Long-bearing and GT Lat-long
+		// currently, It is done in step - 4 
+
+#if 1
+		// Step-4: Odometry calculates teh distance of the intersted object/lane
+		// Processing the receive CM_VDS Farme (D2L)
+		if ((ret = process_data(ptrCliNet, ptrCliNet->img, ptrCliNet->height, ptrCliNet->width)) < 0) {
+			return ret;
+		}
+				
+		//free(ptrCliNet->img);
+		//free(frame_buf);
+#endif
+
+		// Step-5: Odometry calculates the current position from Distane and GT Lat-long.
+		// Currently, it is already done in step - 2 GT_client side. 
+		// Later stage will do in this step host side.
+
+#if 1
+		// Step-6: Odometry passt the calculated value to the application.
+		if ((ret = application_info(ptrCliNet)) < 0) {
 			return ret;
 		}
 #endif

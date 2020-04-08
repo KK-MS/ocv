@@ -170,7 +170,7 @@ int process_data(netrx *ptrCliNet, char *ptr_frame_buf, int height, int width)
 	  
 	  printf("Process frame Displayed.\n");
 
-	  waitKey(100);
+	  waitKey(10);
       break;
     }
   }
