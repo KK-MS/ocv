@@ -64,7 +64,7 @@ typedef struct packet {
 	unsigned int  u4_timestampH;       //< Timestamp High bytes to sync the data
 	float         u4_ins_confidence;   //< INS GPS coordinates confidence/Satellite
 	//float         u4_ins_reserved1;    //< Reserved for future
-	//float         u4_ins_TSign_ds;     //< Reserved for future
+	//loat         u4_ins_TSign_ds;     //< Reserved for future
 	float         u4_ins_cm_d2l;     //< Reserved for future
 	float         u4_ins_latitude;     //< INS latitude
 	float         u4_ins_longitude;    //< INS longitude
@@ -85,7 +85,8 @@ typedef struct packet {
 	// TBD Ground truth. Lane info, landmark info
 
 	// Odometry
-	float  u4_odo_vhcl_yaw;  //< Odometry calculated distance
+	//float  u4_odo_vhcl_yaw;  //< Odometry calculated distance
+	float  u4_odo_distance;  //< Odometry calculated distance
 	float  u4_odo_angle;     //< Relative object angle
 	float  u4_odo_reserved1; //< Reserved
 	float  u4_odo_reserved2; //< Reserved

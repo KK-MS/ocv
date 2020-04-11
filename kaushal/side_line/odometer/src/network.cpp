@@ -30,9 +30,9 @@ int create_server(netrx* ptrCliNet)
 	WSADATA wsa;
 	//char* serverIP = ptrCliNet->serverIP;
 	//int port = ptrCliNet->port;
-	int socket_desc_gt_bridge;
+	int socket_desc;
 
-	struct sockaddr_in server; // = ptrCliNet->sock_remote;
+	struct sockaddr_in server; 
 
 	//printf("\nNXP_Server Creating..%s:%d\n", serverIP, port);
 	printf("\nInitialising Winsock...and b4 WSAStartup\n");
@@ -50,8 +50,8 @@ int create_server(netrx* ptrCliNet)
 	fflush(stdout);
 
 	// Socket Create
-	socket_desc_gt_bridge = socket(AF_INET, SOCK_STREAM, 0);
-	if (socket_desc_gt_bridge == -1) {
+	socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+	if (socket_desc == -1) {
 		perror("Could not create socket");
 		return -1;
 	}
@@ -64,18 +64,18 @@ int create_server(netrx* ptrCliNet)
 	//server.sin_port = htons(port);
 
 	//Bind
-	if (::bind(socket_desc_gt_bridge, (struct sockaddr*) & server, sizeof(server)) < 0) {
+	if (::bind(socket_desc, (struct sockaddr*) & server, sizeof(server)) < 0) {
 		perror("bind failed");
 		return -1;
 	}
 	printf("bind done");
 
-	ptrCliNet->bind_sock_desc_gt_bridge = socket_desc_gt_bridge;
+	ptrCliNet->bind_sock_desc_input_data = socket_desc;
 
 	//Listen // TODO Error check
-	listen(socket_desc_gt_bridge, 3);
+	listen(socket_desc, 3);
 
-	return socket_desc_gt_bridge;
+	return socket_desc;
 
 
 }/*
@@ -85,7 +85,7 @@ int create_server(netrx* ptrCliNet)
  **/
 int accept_client(netrx* ptrCliNet)
 {
-	int socket_desc_gt_bridge = ptrCliNet->bind_sock_desc_gt_bridge;
+	int socket_desc_input_data = ptrCliNet->bind_sock_desc_input_data;
 	int GT_bridge_socket;
 	struct sockaddr_in client;
 	int length = sizeof(struct sockaddr_in);
@@ -94,7 +94,7 @@ int accept_client(netrx* ptrCliNet)
 	//Accept the  incoming connection
 	puts("\nHost Server Waiting for incoming connections...");
 
-	if ((GT_bridge_socket = accept(socket_desc_gt_bridge, (struct sockaddr*) & client, & length)) > 0) {
+	if ((GT_bridge_socket = accept(socket_desc_input_data, (struct sockaddr*) & client, & length)) > 0) {
 		printf("Connection accepted.\n");
 	}
 
@@ -121,7 +121,7 @@ int accept_client(netrx* ptrCliNet)
 	// Based on it, assign it to the variable
 	if (strcmp((char*)& ptrCliNet->stPacket, "APO") == 0) {
 
-		ptrCliNet->sock_desc_gt_bridge = GT_bridge_socket;
+		ptrCliNet->sock_desc_input_data = GT_bridge_socket;
 		printf("\n APO_Client Connected.:%d\n", GT_bridge_socket);
 
 	}
@@ -130,10 +130,10 @@ int accept_client(netrx* ptrCliNet)
 		ptrCliNet->sock_desc_gt = GT_bridge_socket;
 		printf("\n GT_Python Client Connected.:%d\n", GT_bridge_socket);
 	}
-	else if (strcmp((char*)& ptrCliNet->stPacket, "ODO") == 0) {
+	else if (strcmp((char*)& ptrCliNet->stPacket, "APP") == 0) {
 
-		ptrCliNet->sock_desc_odo = GT_bridge_socket;
-		printf("\n ODO_client Connected.:%d\n", GT_bridge_socket);
+		ptrCliNet->sock_desc_app = GT_bridge_socket;
+		printf("\n Application_client Connected.:%d\n", GT_bridge_socket);
 
 	}
 	else {
