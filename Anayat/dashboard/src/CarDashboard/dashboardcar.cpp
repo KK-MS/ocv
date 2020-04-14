@@ -16,21 +16,30 @@ int detect_light(Mat ROI);
 
 struct parameters
 {
-	int x, y, w, h;
+	//ROI Parameters
+    int height;
+	int width;
+	int x_coordinate;
+	int y_coordinate;
+	
+	//output as a flag
+	bool output1 = true;
+	bool output2 = false;
+
 };
 
-void getinputparameters(cv::Mat img)
+void get_inputparameters(parameters *Ptr, cv::Mat img)
 {
 	parameters P;
 	cout << "Enter the value of top left x coordinate:";
-	cin >> P.x;
+	cin >> Ptr->x_coordinate;
 	cout << "Enter the value of top left y coordinate:";
-	cin >> P.y;
+	cin >> Ptr->y_coordinate;
 	cout << "Enter the value of rectangle width:";
-	cin >> P.w;
+	cin >> Ptr->width;
 	cout << "Enter the value of rectangle height:";
-	cin >> P.h;
-	Rect2i myROI(P.x, P.y, P.w, P.h);
+	cin >> Ptr->height;
+	Rect2i myROI(Ptr->x_coordinate, Ptr->y_coordinate, Ptr->width, Ptr->height);
 	ROI = img(myROI);
 }
 
@@ -49,7 +58,7 @@ int main(int argc, char** argv)
 			break;
 		}
 		//img = imread("C:/output/aaa.png", IMREAD_COLOR); // Read the file
-		getinputparameters(img);
+		get_inputparameters(&P, img);
 		detect_light(ROI);
 		ofstream myfile;
 		myfile.open("output.txt");
@@ -94,12 +103,16 @@ int detect_light(Mat ROI)
 	if (num >= 3) 
 	{
        printf("Invalid color selection\n");
+	  // std::cout << std::boolalpha << P.output2 << '\n';
+	   std::cout << std::noboolalpha << P.output2 << '\n';
 	   return 0;
     }
+
 	
 	if (num <= 0)
 	{
        printf("Invalid color selection\n");
+	   std::cout << std::noboolalpha << P.output2 << '\n';
 	   return 0;
 	}
 	
@@ -111,8 +124,9 @@ int detect_light(Mat ROI)
 	for (size_t current_circle = 0; current_circle < circles.size(); ++current_circle) {
 		cv::Point center(std::round(circles[current_circle][0]), std::round(circles[current_circle][1]));
 		int radius = std::round(circles[current_circle][2]);
-
+		std::cout << std::noboolalpha << P.output1 << '\n';
 		cv::circle(ROI, center, radius, cv::Scalar(139, 0, 0), 3);
+
 		cv::namedWindow("Detected input image", cv::WINDOW_AUTOSIZE);
 		cv::imshow("Detected input image", ROI);
 		cv::namedWindow("Detected hsv image", cv::WINDOW_AUTOSIZE);
