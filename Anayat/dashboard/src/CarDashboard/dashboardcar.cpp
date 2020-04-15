@@ -47,25 +47,28 @@ int main(int argc, char** argv)
 {
 	parameters P;
 	char name[50];
-	int i = 0;
+	//int i = 0;
 	while (1)
 	{
-	    sprintf_s(name, "C:/images/image%d.png", i);
-		Mat img = imread(name, 1);
-		if (img.empty())
+		for (int i = 0; i <= 2; i++)
 		{
-			printf("image not loaded");
-			break;
+			sprintf_s(name, "C:/images/image%d.png", i);
+			Mat img = imread(name, 1);
+			if (img.empty())
+			{
+				printf("image not loaded");
+				break;
+			}
+			//img = imread("C:/output/aaa.png", IMREAD_COLOR); // Read the file
+			get_inputparameters(&P, img);
+			detect_light(ROI);
+			ofstream myfile;
+			myfile.open("output.txt");
+			myfile << "Red or Green light is detected\n";
+			myfile.close();
+			waitKey(1);
+			//i++;
 		}
-		//img = imread("C:/output/aaa.png", IMREAD_COLOR); // Read the file
-		get_inputparameters(&P, img);
-		detect_light(ROI);
-		ofstream myfile;
-		myfile.open("output.txt");
-		myfile << "Red or Green light is detected\n";
-		myfile.close();
-		i++;
-		waitKey(0);
 	}
 	
 	return 0;
@@ -120,7 +123,11 @@ int detect_light(Mat ROI)
 	cv::GaussianBlur(hue_image, hue_image, cv::Size(9, 9), 2, 2);
 	std::vector<cv::Vec3f> circles;
 	cv::HoughCircles(hue_image, circles, HOUGH_GRADIENT, 1, hue_image.rows / 8, 100, 27, 0, 0);
-	if (circles.size() == 0) std::exit(-1);
+	if (circles.size() == 0)
+	{
+		std::cout << std::noboolalpha << P.output2 << '\n';
+		std::exit(-1);
+    }
 	for (size_t current_circle = 0; current_circle < circles.size(); ++current_circle) {
 		cv::Point center(std::round(circles[current_circle][0]), std::round(circles[current_circle][1]));
 		int radius = std::round(circles[current_circle][2]);
@@ -131,8 +138,8 @@ int detect_light(Mat ROI)
 		cv::imshow("Detected input image", ROI);
 		cv::namedWindow("Detected hsv image", cv::WINDOW_AUTOSIZE);
 		cv::imshow("Detected hsv image", image_hsv);
-
+		
 	}
-
+	
 	return 0;
 }
