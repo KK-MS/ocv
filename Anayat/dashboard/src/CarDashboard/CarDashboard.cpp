@@ -6,403 +6,137 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
-#include "../../../library/include/opencv2/highgui/highgui_c.h"
+#include <fstream>
 using namespace cv;
 using namespace std;
-Mat src, img, ROI, image, image_hsv;
-cv::Mat lower_red_hue_range;
-cv::Mat upper_red_hue_range;
-cv::Mat red_hue_image;
-Rect cropRect(0, 0, 0, 0);
-Point P1(0, 0);
-Point P2(0, 0);
+Mat ROI;
+Mat img;
+Mat image_hsv;
 
-const char* winName = "Crop Image";
-bool clicked = false;
-int i = 0;
-char imgName[15];
-
-
-void checkBoundary() {
-	//check croping rectangle exceed image boundary
-	if (cropRect.width > img.cols - cropRect.x)
-		cropRect.width = img.cols - cropRect.x;
-
-	if (cropRect.height > img.rows - cropRect.y)
-		cropRect.height = img.rows - cropRect.y;
-
-	if (cropRect.x < 0)
-		cropRect.x = 0;
-
-	if (cropRect.y < 0)
-		cropRect.height = 0;
-}
-
-void showImage() {
-	img = src.clone();
-	checkBoundary();
-	if (cropRect.width > 0 && cropRect.height > 0) {
-		ROI = src(cropRect);
-		imshow("cropped", ROI);
-	}
-
-	rectangle(img, cropRect, Scalar(0, 255, 0), 1, 8, 0);
-	imshow(winName, img);
-}
-
-
-void onMouse(int event, int x, int y, int f, void*) {
-
-
-	switch (event) {
-
-	case  CV_EVENT_LBUTTONDOWN:
-		clicked = true;
-
-		P1.x = x;
-		P1.y = y;
-		P2.x = x;
-		P2.y = y;
-		break;
-
-	case  CV_EVENT_LBUTTONUP:
-		P2.x = x;
-		P2.y = y;
-		clicked = false;
-		break;
-
-	case  CV_EVENT_MOUSEMOVE:
-		if (clicked) {
-			P2.x = x;
-			P2.y = y;
-		}
-		break;
-
-	default:   break;
-
-
-	}
-
-
-	if (clicked) {
-		if (P1.x > P2.x) {
-			cropRect.x = P2.x;
-			cropRect.width = P1.x - P2.x;
-		}
-		else {
-			cropRect.x = P1.x;
-			cropRect.width = P2.x - P1.x;
-		}
-
-		if (P1.y > P2.y) {
-			cropRect.y = P2.y;
-			cropRect.height = P1.y - P2.y;
-		}
-		else {
-			cropRect.y = P1.y;
-			cropRect.height = P2.y - P1.y;
-		}
-
-	}
-
-
-	showImage();
-
-
-}
-int main()
+struct parameters
 {
+	//ROI Parameters
+    int height;
+	int width;
+	int x_coordinate;
+	int y_coordinate;
 	
-	cout << "Click and drag for Selection" << endl << endl;
-	cout << "------> Press 's' to save" << endl << endl;
+    //output as a flag
+	bool output1 = true;
+	bool output2 = false;
 
-	cout << "------> Press '8' to move up" << endl;
-	cout << "------> Press '2' to move down" << endl;
-	cout << "------> Press '6' to move right" << endl;
-	cout << "------> Press '4' to move left" << endl << endl;
+	//which color to detect
+	int color;
+};
 
-	cout << "------> Press 'w' increas top" << endl;
-	cout << "------> Press 'x' increas bottom" << endl;
-	cout << "------> Press 'd' increas right" << endl;
-	cout << "------> Press 'a' increas left" << endl << endl;
+void get_input_parameters(parameters *Ptr, cv::Mat img)
+{
+	parameters P;
+	cout << "Enter the value of top left x coordinate:";
+	cin >> Ptr->x_coordinate;
+	cout << "Enter the value of top left y coordinate:";
+	cin >> Ptr->y_coordinate;
+	cout << "Enter the value of rectangle width:";
+	cin >> Ptr->width;
+	cout << "Enter the value of rectangle height:";
+	cin >> Ptr->height;
+	Rect2i myROI(Ptr->x_coordinate, Ptr->y_coordinate, Ptr->width, Ptr->height);
+	ROI = img(myROI);
+}
 
-	cout << "------> Press 't' decrease top" << endl;
-	cout << "------> Press 'b' decrease bottom" << endl;
-	cout << "------> Press 'h' decrease right" << endl;
-	cout << "------> Press 'f' decrease left" << endl << endl;
+void detect_light(parameters *ptr, cv::Mat ROI)
+{
+	parameters P;
+	cv::Mat image_hsv;
+	cv::Mat lower_hue_range;
+	cv::Mat upper_hue_range;
+	cv::Mat hue_image;
+	cv::medianBlur(ROI, ROI, 3);
+	cv::cvtColor(ROI, image_hsv, COLOR_BGR2HSV);
 
-	cout << "------> Press 'r' to reset" << endl;
-	cout << "------> Press 'Esc' to quit" << endl << endl;
+	cout << "Press 1 to detect red light" << endl << endl;
+	cout << "Press 2 to detect Green light" << endl << endl;
+	cin >> ptr->color;
 
+	if (ptr->color == 1)
+	{
+		cv::inRange(image_hsv, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), lower_hue_range);
+		cv::inRange(image_hsv, cv::Scalar(160, 100, 100), cv::Scalar(179, 255, 255), upper_hue_range);
+	}
 
-	src = imread("C:/output/dsBuffer.png", 1);
+	if (ptr->color == 2)
+	{
 
-	namedWindow(winName, WINDOW_NORMAL);
-	setMouseCallback(winName, onMouse, NULL);
-	imshow(winName, src);
+		cv::inRange(image_hsv, cv::Scalar(40, 40, 40), cv::Scalar(86, 255, 255), lower_hue_range);
+		cv::inRange(image_hsv, cv::Scalar(40, 40, 40), cv::Scalar(70, 255, 255), upper_hue_range);
+    }
 
+	if (ptr->color >= 3)
+	{
+		printf("Invalid color selection\n");
+		// std::cout << std::boolalpha << P.output2 << '\n'; // For getting output as "false" 
+		std::cout << std::noboolalpha << P.output2 << '\n';
+		return void();
+		
+	}
+    
+	if (ptr->color <= 0)
+	{
+		printf("Invalid color selection\n");
+		std::cout << std::noboolalpha << P.output2 << '\n';
+		return void();
+	}
+
+	cv::addWeighted(lower_hue_range, 1.0, upper_hue_range, 1.0, 0.0, hue_image);
+	cv::GaussianBlur(hue_image, hue_image, cv::Size(9, 9), 2, 2);
+	std::vector<cv::Vec3f> circles;
+	cv::HoughCircles(hue_image, circles, HOUGH_GRADIENT, 1, hue_image.rows / 8, 100, 27, 0, 0);
+	if (circles.size() == 0)
+	{
+		std::cout << std::noboolalpha << P.output2 << '\n';
+		std::exit(-1);
+	}
+	for (size_t current_circle = 0; current_circle < circles.size(); ++current_circle) {
+		cv::Point center(std::round(circles[current_circle][0]), std::round(circles[current_circle][1]));
+		int radius = std::round(circles[current_circle][2]);
+		std::cout << std::noboolalpha << P.output1 << '\n';
+		cv::circle(ROI, center, radius, cv::Scalar(139, 0, 0), 3);
+
+		cv::namedWindow("Detected input image", cv::WINDOW_AUTOSIZE);
+		cv::imshow("Detected input image", ROI);
+		cv::namedWindow("Detected hsv image", cv::WINDOW_AUTOSIZE);
+		cv::imshow("Detected hsv image", image_hsv);
+
+	}
+
+	return void();
+}
+
+int main(int argc, char** argv)
+{
+	parameters P;
+	char name[50];
 	while (1)
 	{
-		char c = waitKey();
-		printf("Check\n");
-		if ((c >= 'a') && (c >= 'z'))
+		for (int i = 0; i <= 2; i++)
 		{
-			printf("%c", c);
-		}
-		
-		if (c == 's' && ROI.data) {
-			sprintf_s(imgName, "%d.jpg", i++);
-			imwrite(imgName, ROI);
-			cout << "  Saved " << imgName << endl;
-		}
-		if (c == '6') cropRect.x++;
-		if (c == '4') cropRect.x--;
-		if (c == '8') cropRect.y--;
-		if (c == '2') cropRect.y++;
-
-		if (c == 'w') { cropRect.y--; cropRect.height++; }
-		if (c == 'd') cropRect.width++;
-		if (c == 'x') cropRect.height++;
-		if (c == 'a') { cropRect.x--; cropRect.width++; }
-
-		if (c == 't') { cropRect.y++; cropRect.height--; }
-		if (c == 'h') cropRect.width--;
-		if (c == 'b') cropRect.height--;
-		if (c == 'f') { cropRect.x++; cropRect.width--; }
-
-		if (c == 27) break;
-		if (c == 'r') { cropRect.x = 0;cropRect.y = 0;cropRect.width = 0;cropRect.height = 0; }
-		showImage();
-		int num;
-		cout << "Press 1 to detect red light" << endl << endl;
-		cout << "Press 2 to detect Green light" << endl << endl;
-		cin >> num;
-		if (num ==1) {
-
-			cv::medianBlur(ROI, image, 3);
-
-			cv::cvtColor(image, image_hsv, COLOR_BGR2HSV);
-
-			cv::inRange(image_hsv, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), lower_red_hue_range);
-
-			cv::inRange(image_hsv, cv::Scalar(160, 100, 100), cv::Scalar(179, 255, 255), upper_red_hue_range);
-
-			cv::addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
-			cv::GaussianBlur(red_hue_image, red_hue_image, cv::Size(9, 9), 2, 2);
-			std::vector<cv::Vec3f> circles;
-			cv::HoughCircles(red_hue_image, circles, HOUGH_GRADIENT, 1, red_hue_image.rows / 8, 100, 20, 0, 0);
-			if (circles.size() == 0) std::exit(-1);
-			for (size_t current_circle = 0; current_circle < circles.size(); ++current_circle) {
-				cv::Point center(std::round(circles[current_circle][0]), std::round(circles[current_circle][1]));
-				int radius = std::round(circles[current_circle][2]);
-
-				cv::circle(image, center, radius, cv::Scalar(0, 255, 0), 3);
-				cv::imshow("Detected red circles on the input image", image);
-
+			sprintf_s(name, "C:/images/image%d.png", i);
+			Mat img = imread(name, 1);
+			if (img.empty())
+			{
+				printf("image not loaded");
+				break;
 			}
+			get_input_parameters(&P, img);
+			detect_light(&P, ROI);
+			ofstream myfile;
+			myfile.open("output.txt");
+			myfile << "Red or Green light is detected\n";
+			myfile.close();
+			waitKey(1);
 		}
-		
-        if (num == 2) {
-
-			cv::medianBlur(ROI, image, 3);
-
-			cv::cvtColor(image, image_hsv, COLOR_BGR2HSV);
-			printf("Check_HSV\n");
-
-			cv::inRange(image_hsv, cv::Scalar(40, 40, 40), cv::Scalar(86, 255, 255), lower_red_hue_range);
-			cv::inRange(image_hsv, cv::Scalar(40, 40, 40), cv::Scalar(70, 255, 255), upper_red_hue_range);
-			cv::addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
-			cv::GaussianBlur(red_hue_image, red_hue_image, cv::Size(9, 9), 2, 2);
-			std::vector<cv::Vec3f> circles;
-			cv::HoughCircles(red_hue_image, circles, HOUGH_GRADIENT, 1, red_hue_image.rows / 8, 100, 27, 0, 0);
-			if (circles.size() == 0) std::exit(-1);
-			for (size_t current_circle = 0; current_circle < circles.size(); ++current_circle) {
-				cv::Point center(std::round(circles[current_circle][0]), std::round(circles[current_circle][1]));
-				int radius = std::round(circles[current_circle][2]);
-
-				cv::circle(image, center, radius, cv::Scalar(139, 0, 0), 3);
-				cv::imshow("Detected red circles on the input image", image);
-
-			}
-		}
-
-		if (num >= 3) {
-
-			printf("Invalid color selection\n");
-
-		}
-
-		if (num <= 0) {
-
-			printf("Invalid color selection\n");
-
-		}
-		
 	}
-
+	
 	return 0;
 }
 
-/*int main(int argc, char** argv)
-{
-	Mat image;
-	image = imread("C:/output/image-100.png", IMREAD_COLOR); // Read the file
-	int x, y, w, h;
-	cout << "Enter the value of top left x coordinate:";
-	cin >> x;
-	cout << "Enter the value of top left y coordinate:";
-	cin >> y;
-	cout << "Enter the value of rectangle width:";
-	cin >> w;
-	cout << "Enter the value of rectangle height:";
-	cin >> h;
-	Rect myROI(x, y, w, h);
-	rectangle(image, myROI, cv::Scalar(255, 0, 0), 2, 8, 0);
-    namedWindow("Display window", WINDOW_AUTOSIZE); // Create a window for display.
-	imshow("Display window", image);  // Show our image inside it.
-	waitKey(0);
-	return 0;
-}*/
-/*#include "opencv2/opencv.hpp"
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include "../../../library/include/opencv2/highgui/highgui_c.h"
-#include <vector>
-#include <iostream>
-
-using cv::WINDOW_NORMAL;
-using cv::imread;
-using cv::waitKey;
-using cv::setMouseCallback;
-using cv::imshow;
-using cv::Rect;
-using cv::Point;
-using cv::Scalar;
-using cv::rectangle;
-using cv::Mat;
-
-Mat source_image;
-Mat img;
-
-// Current rectangle and start&end points
-Rect rect(0, 0, 0, 0);
-Point P1(0, 0);
-Point P2(0, 0);
-
-// Rectangles to be outputted
-std::vector<Rect> rects;
-
-static const char* WINDOW_NAME = "Tracking Info Generator";
-static bool clicked = false;
-
-
-void fixBoundaries() {
-	if (rect.width > img.cols - rect.x)
-		rect.width = img.cols - rect.x;
-
-	if (rect.height > img.rows - rect.y)
-		rect.height = img.rows - rect.y;
-
-	if (rect.x < 0)
-		rect.x = 0;
-
-	if (rect.y < 0)
-		rect.height = 0;
-}
-
-void draw() {
-	img = source_image.clone();
-	fixBoundaries();
-
-	for (const auto& r : rects)
-		rectangle(img, r, Scalar(0, 255, 0), 1, 8, 0);
-	rectangle(img, rect, Scalar(0, 255, 0), 1, 8, 0);
-
-	imshow(WINDOW_NAME, img);
-}
-
-
-void onMouse(int event, int x, int y, int f, void*) {
-	switch (event) {
-	case CV_EVENT_LBUTTONDOWN:
-		clicked = true;
-		P1.x = x;
-		P1.y = y;
-		P2.x = x;
-		P2.y = y;
-		break;
-
-	case  CV_EVENT_LBUTTONUP:
-		clicked = false;
-		P2.x = x;
-		P2.y = y;
-		break;
-
-	case CV_EVENT_MOUSEMOVE:
-		if (clicked) {
-			P2.x = x;
-			P2.y = y;
-		}
-		break;
-
-	default:
-		break;
-	}
-
-	if (P1.x > P2.x) {
-		rect.x = P2.x;
-		rect.width = P1.x - P2.x;
-	}
-	else {
-		rect.x = P1.x;
-		rect.width = P2.x - P1.x;
-	}
-
-	if (P1.y > P2.y) {
-		rect.y = P2.y;
-		rect.height = P1.y - P2.y;
-	}
-	else {
-		rect.y = P1.y;
-		rect.height = P2.y - P1.y;
-	}
-
-	draw();
-}
-
-int main()
-{
-	source_image = imread("C:/output/lll.png", 1);
-
-	namedWindow(WINDOW_NAME, WINDOW_NORMAL);
-	setMouseCallback(WINDOW_NAME, onMouse, NULL);
-	imshow(WINDOW_NAME, source_image);
-
-	while (1) {
-		char c = waitKey();
-
-		switch (c) {
-		case 's':
-			if (rects.empty()) {
-				std::cerr << "No rect added." << std::endl
-					<< "Select an area and press 'a' to add!" << std::endl;
-				continue;
-			}
-
-			for (const auto& r : rects) {
-				std::cout << r.x + r.width / 2 << " "
-					<< r.y + r.height / 2 << std::endl;
-			}
-			break;
-		case 'a':
-			rects.push_back(rect);
-			rect = Rect(0, 0, 0, 0);
-			break;
-		}
-	}
-
-	return 0;
-}*/
