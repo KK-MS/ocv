@@ -6,7 +6,7 @@ APO is a carmaker client,
 1. collects the IMU data from the CarMaker.
 2. Capture Images from CarMaker Movie
 
-## Odometer
+## Location using Groundtruth (GT) and Visual Odometer
 Host_server plays a role of odometer.
 * Step-1: It receives the input data (IMU + Images),
 * Step-2: Odometry pass IMU data to Ground truth and get the Sidelane/Traffic sign details.
