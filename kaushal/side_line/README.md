@@ -8,12 +8,12 @@ APO is a carmaker client,
 
 ## Location using Groundtruth (GT) and Visual Odometer
 Host_server plays a role of odometer.
-* Step-1: It receives the input data (IMU + Images),
+* Step-1: Odometry receives the input data (IMU + Images),
 * Step-2: Odometry pass IMU data to Ground truth and get the Sidelane/Traffic sign details.
-* Step-3: Odometry calculates the Region of Interst from IMU Lat-Long-bearing and GT Lat-long
-* Step-4: Odometry calculates teh distance of the intersted object/lane
-* Step-5: Odometry calculates the current position from Distane and GT Lat-long.
-* Step-6: Odometry passt the calculated value to the application.
+* Step-3: Odometry calculates the distance and angle between GT lat-long-bearing and IMU lat-long-bearing and with it defines Region of Interest based on their (IMU, GT) accuracy.
+* Step-4: Odometry calculates the distance of the interested object/lane using image processing, also derives confident level.
+* Step-5: Odometry calculates the current position using Step-4 distane and GT Lat-long.
+* Step-6: Odometry provides the calculated value and its confident level to the application.
 
 ## Application
 Demo application that recevies the repositioned lat-long
