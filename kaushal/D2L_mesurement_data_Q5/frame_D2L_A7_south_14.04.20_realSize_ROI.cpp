@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   Scalar pixelValue;
   uchar pixel;
 
-  // lane threshold parameters 
+  // lane threshold parameters
   int iLanePixelCount = 0;
   int iLanePixelThreshold = 10;
   int iLaneColorUpperThreshold = 250;
@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
 
   // Load the image files from folder in sequence
   vector<cv::String> fn;
-  
   glob("D:/A7_measurement_14.4.20/ZIM212/*.png", fn, false); // ZIM 212
 
   // to save the frames as video
@@ -70,8 +69,9 @@ int main(int argc, char *argv[])
   // Process the frames to find D2L and save the processed frames in device
   while (getline(data, row)) {
 
+
     // open the file
-	file = fopen("A7_south_process.csv", "a");
+    file = fopen("A7_south_process.csv", "a");
 
 	// get the needed GT_METDADA from csv file for process the frame in sequence
 	row_count += 1;
