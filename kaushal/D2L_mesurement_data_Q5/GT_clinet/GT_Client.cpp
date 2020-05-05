@@ -19,22 +19,22 @@
 
 using namespace std;
 
-// TODO:
-// description:
-//
-// Client application to receive the corrected position.
-// E.g. in ground truth project: role of Genesys
+/*
+ ** Description
+ **
+ ** GT_Client information send to Host sever.
+ ** for process the frame to create the ROI for Find D2L. 
+ */
+
 int main(int argc , char *argv[])
 {
   WSADATA wsa;
   SOCKET sock;
   struct sockaddr_in client;
-
-  memset(&client, 0, sizeof(client));
-
   int send_size;
   int read_size;
-  char info[] = "APP";
+  
+  memset(&client, 0, sizeof(client));
 
   printf("\nInitialising Winsock...");
 
@@ -71,21 +71,7 @@ int main(int argc , char *argv[])
   puts("\nConnected.");
   fflush(stdout);
 
-#if 0
-
-  //send the CM_METADAT to NXP_Server fro Frame processing
-  send_size = send(sock, info, sizeof(info) , 0);
-
-  if(send_size == -1){
-    printf("\n***Error in sending request for Lane information: [%d] : %s, [%d]\n", errno, strerror(errno), send_size);
-    return -1;
-  }
-
-  printf("send Size: %d\n", send_size);
-#endif
-
-  /*Receive METADATA from Server */
-
+  // structure  define
   netrx ptrCliNet;
 
   // Packet structure define
@@ -105,6 +91,7 @@ int main(int argc , char *argv[])
   // Skip the header line or first line of file
   getline(data, row);  
 
+  // read the GT_data line by line and send to host server
   while (getline(data, row))
   {
     // get the needed GT_METDADA from csv file for process the frame in sequence
@@ -134,7 +121,7 @@ int main(int argc , char *argv[])
 	}
 	ptr_metadata->u4_ins_cm_d2l = GT_D2L;
 	
-	// send CM Data to GT_server
+	// send GT_Data to Host_server
 	send_size = send(sock, (char*)ptr_metadata, sizeof(PACKET), 0);
 	if (send_size == -1) {
 		printf("***Error in sending Request for MetaData: [%d] : %s\n"
@@ -142,38 +129,7 @@ int main(int argc , char *argv[])
 		return -1;
 	}
 	printf("send_size:%d\n", send_size);
-	
-#if 0
-    //  Host server to the odometry
-    read_size = recv(sock, (char *)ptr_metadata, sizeof(PACKET), 0);
-    if (read_size < 0) {
-      printf("***Error in Receiving MetaData: [%d] : %s\n", errno, strerror(errno));
-      return -1;
-    }
-
-    if (read_size != sizeof(PACKET)) {
-      printf("***Error: RX METADATA PACKET got %d\n", read_size);
-      // TODO: log the error and request again for metadata
-    }
-
-    printf("read_size:%d\n", read_size);
-
-    // Display the TIME + CM_GPS + TS + D2TS Data
-    printf("\nTimeL: %f\n",ptr_metadata->u4_timestampL);
-    printf("lat: %f\n", ptr_metadata->u4_ins_latitude);
-    printf("lon: %f\n", ptr_metadata->u4_ins_longitude);
-    printf("CM_D2L: %f\n", ptr_metadata->u4_ins_cm_d2l);
-    printf("New_lat: %f\n", ptr_metadata->u4_out_odo_latitude);
-    printf("New_lon: %f\n", ptr_metadata->u4_out_odo_longitude);
-    printf("New_lon: %f\n", ptr_metadata->u4_odo_distance);
-
-    // Write the process METADATA in .csv file
-    fprintf(file,"%f, %f, %f, %f, %f, %f, %f\n", ptr_metadata->u4_timestampL, ptr_metadata->u4_ins_latitude, ptr_metadata->u4_ins_longitude, ptr_metadata->u4_ins_cm_d2l, ptr_metadata->u4_odo_distance, ptr_metadata->u4_out_odo_latitude, ptr_metadata->u4_out_odo_longitude);
-#endif
-
- }
-
-
+ } // loop
 
   closesocket(sock);
   WSACleanup();

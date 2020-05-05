@@ -25,7 +25,7 @@
 3. Recive the Corrected GPS Car position.
 4. process the Frame to find the D2L.
 5. send the Updated packet to Applciation client.
-6. Applciation clieny recieve the Updated METADATA and save it in CSV file to use it in furthur application.
+6. Applciation client recieve the Updated METADATA and save it in CSV file to use it in furthur application.
 
 
 
