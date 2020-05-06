@@ -53,7 +53,6 @@ enum request_type {
   REQ_GT_TRAFFIC_SIGN_INFO,
 };
 
-
 // Main request packet
 typedef struct packet {
 	// Request type
@@ -64,7 +63,7 @@ typedef struct packet {
 	unsigned int  u4_timestampH;       //< Timestamp High bytes to sync the data
 	float         u4_ins_confidence;   //< INS GPS coordinates confidence/Satellite
 	//float         u4_ins_reserved1;    //< Reserved for future
-	//loat         u4_ins_TSign_ds;     //< Reserved for future
+	//loat          u4_ins_TSign_ds;     //< Reserved for future
 	float         u4_ins_cm_d2l;     //< Reserved for future
 	float         u4_ins_latitude;     //< INS latitude
 	float         u4_ins_longitude;    //< INS longitude
@@ -117,4 +116,3 @@ typedef struct gt_lane_packet{
 } GT_LANE_PACKET;
 
 #endif /* PACKET_H */
-

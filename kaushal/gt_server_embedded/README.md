@@ -5,11 +5,11 @@
 ## Compilation
 in MSYS
 ```console
-g++ GT_Client.cpp  -o gt_client -lws2_32 -std=c++11
+g++ main.cpp network.cpp server_tcp.cpp -I ../include -o gt_server -lws2_32 -std=c++11
 ```
 
 ## Run
 
 ```console
-./gt_client
+./gt_server.exe 127.0.0.1 8889 ZIM212.csv
 ```
