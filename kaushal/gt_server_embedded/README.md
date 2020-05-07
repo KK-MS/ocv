@@ -1,6 +1,7 @@
-# GT Clinet
-1. Connect with HOST server.
-2. Read the GT_Data From CSV file and send it to server for Prcocess the frame.
+# GT Server_Embedded
+1. Connect with HOST Client
+2. Receive the request form client, Read the GT_Data From CSV file 
+3. Send data to Client for Prcocess the frame to Create the ROI > D2L / D2TS 
 
 ## Compilation
 in MSYS
