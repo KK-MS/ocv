@@ -9,6 +9,7 @@
 #pragma warning(disable:4996)
 
 #include "opencv2/opencv.hpp"
+
 #include "packet.h"
 #include "netrx.h"
 
@@ -22,17 +23,17 @@ using namespace cv;
 
 #define PIXEL_DIST 2.27  // in to mm  by calibration  
 
+// Function Declaration
+int gt_info_receive_frame_process(netrx* ptrCliNet);
+
 /*
- ** Description
+ ** network_connect
  **
- ** Host sever application to recieve the GT_data from GT_Client.
- ** For process the frame with create the ROI for Find D2L.
+ ** Connect to GT_Server
  */
 
-int main(int argc, char* argv[])
+int network_connect(netrx* ptrCliNet)
 {
-	/*************************** NETWORK CREATE & CONNECT **********************/
-
 	WSADATA wsa;
 	SOCKET sock;
 	struct sockaddr_in client;
@@ -66,21 +67,74 @@ int main(int argc, char* argv[])
 	//Connect to remote server
 	if (connect(sock, (struct sockaddr*) & client, sizeof(client)) < 0)
 	{
-		puts("connect error");
+		puts("***connection Error.");
 		fflush(stdout);
 		return 1;
 	}
 
+	ptrCliNet->sock_desc = sock;
+
 	puts("\nConnected.");
 	fflush(stdout);
 
-	// Strcuture define
-	netrx ptrCliNet;
+	return sock;
+}
 
-	/***************** RECIEVE THE GT_DATA & PROCESS THE FRAME ****************/
+/*
+ ** netrx_gt_info
+ **
+ ** Network Conenct to GT_Server
+ ** Receive the GT_info & Process the frame
+ */
+int netrx_gt_info(netrx* cliNet)
+{
+	int ret_val;
+	int socket_desc;
 
+	ret_val = network_connect(cliNet);
+	if (ret_val < 0) {
+		printf("\nError in network create:[%d] %s\n", errno, strerror(errno));
+		return -1;
+	}
+		
+	// Send the request to server and receiving the GT_Data > Process the frame, create the ROI
+	// find the D2L / D2TS
+	ret_val = gt_info_receive_frame_process(cliNet);
+
+	printf("\n@END: Receive the GT Inforamtion and process the frames: %d\n", ret_val);
+
+	return 0;
+}
+
+/*
+ ** Description
+ **
+ ** Host sever application to recieve the GT_data from GT_Client.
+ ** For process the frame with create the ROI for Find D2L / D2TS.
+ */
+int main(int argc, char* argv[])
+{
+	netrx cliNet; // TODO use malloc to create netrx object.
+
+	// Network Conenct and sending Receive the IMU DATA from client and send the SL/TS data to client 
+	netrx_gt_info(&cliNet);
+
+	return 0;
+}
+
+/*
+ ** gt_info_receive_frame_process
+ **
+ ** Network Conenct to GT_Server
+ ** Send the request to server for GT_Data
+ ** receive the GT_info
+ ** Process the frame > Create the ROI
+ ** Calculate the D2L / D2TS
+ */
+int gt_info_receive_frame_process(netrx* ptrCliNet)
+{
 	// Packet structure define
-	PACKET* ptr_metadata = (PACKET*) & (ptrCliNet.stPacket);
+	PACKET* ptr_metadata = (PACKET*) & (ptrCliNet->stPacket);
 
 	int send_size;
 	int read_size;
@@ -129,7 +183,7 @@ int main(int argc, char* argv[])
 	printf("\nRequest METADATA\n");
 	ptr_metadata->u4_request_type = REQ_GT_LANE_INFO;
 
-	send_size = send(sock, (char*)ptr_metadata, sizeof(PACKET), 0);
+	send_size = send(ptrCliNet->sock_desc, (char*)ptr_metadata, sizeof(PACKET), 0);
 	if (send_size == -1) {
 		printf("***Error in sending Request for MetaData: [%d] : %s\n", errno, strerror(errno));
 		return -1;
@@ -144,7 +198,7 @@ int main(int argc, char* argv[])
 		file = fopen("A7_south_process.csv", "a");
 
 		// Host server recieves GT_Info from GT_Client
-		read_size = recv(sock, (char*)ptr_metadata, sizeof(PACKET), 0);
+		read_size = recv(ptrCliNet->sock_desc, (char*)ptr_metadata, sizeof(PACKET), 0);
 		if (read_size < 0) {
 			printf("***Error in Receiving MetaData: [%d] : %s\n", errno, strerror(errno));
 			return -1;
@@ -152,7 +206,6 @@ int main(int argc, char* argv[])
 
 		if (read_size != sizeof(PACKET)) {
 			printf("***Error: RX METADATA PACKET got %d\n", read_size);
-			// TODO: log the error and request again for metadata
 		}
 
 		printf("read_size:%d\n", read_size);
@@ -220,16 +273,16 @@ int main(int argc, char* argv[])
 		Canny(LinesImg, LinesImg, minCannyThreshold, maxCannyThreshold, 3, true);
 
 		// Morphological Operation
-		Mat k = getStructuringElement(MORPH_RECT, Size(5, 5)); //MATLAB :k=Ones(9) // process_1 
+		Mat k = getStructuringElement(MORPH_RECT, Size(5, 5));  
 
 		morphologyEx(LinesImg, LinesImg, MORPH_CLOSE, k);
 
 		// Now, applying Hough line transform to detect the Lines in our frame
 		vector<Vec4i> lines;
 
-		HoughLinesP(LinesImg, lines, 1, CV_PI / 180, 5, 0, 10); // process_2
+		HoughLinesP(LinesImg, lines, 1, CV_PI / 180, 5, 0, 10); 
 
-																// Draw our lines
+		// Draw our lines
 		for (size_t i = 0; i < lines.size(); i++) {
 
 			Vec4i l = lines[i];  // we have 4 elements p1=x1,y1  p2= x2,y2
