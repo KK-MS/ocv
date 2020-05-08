@@ -70,3 +70,10 @@ For example:- {"Name":"XX", "Age":"1000"}
 
 # JSON Fundamentals
 
+To be added
+
+## SRC and LIB Folders
+
+In this folder, there are two folders namely src and lib. The lib folder contains the library needed for JSON Parser (cJSON). 
+In src folder, there are two programs namely test.cpp and JSON_parse.cpp. In test.cpp, the program creates a JSON object. The input is text in a structured format. The structure is mentioned in the code and it should be in that format. 
+In JSON_parse.cpp, the code takes in a JSON string and converts it to text and prints it on the console window.
