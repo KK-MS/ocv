@@ -22,23 +22,10 @@
 *
 ****************************************************************************/
 
-
 #ifndef NETRX_H
 #define NETRX_H
 
-//#include <arpa/inet.h>
-
 #include "packet.h"
-
-// MACROS
-// Possible to set input resolution (must be supported by the DCU)
-#define WIDTH            (1280u) // width of DDR buffer in pixels
-#define HEIGHT           (720u)  // height of DDR buffer in pixels
-#define DDR_BUFFER_CNT   (3u)    // number of DDR buffers per ISP stream
-
-#define DDR_BUF_SIZE (WIDTH * HEIGHT * DDR_BUFFER_CNT)
-
-#define FRAME_WIDTH 1280         // For processing the frame
 
 // Namespace
 using namespace std;
@@ -73,9 +60,9 @@ typedef struct netrx {
   int bind_sock_desc;
   int bind_sock_desc_gt;
   int bind_sock_desc_gt_bridge;
-  
+
   char *gt_filename;	// csv filename
-  
+
   // Buffer handling variables
   char *ptr_req_buf;  // pointer to buffer where request is received
   char *ptr_send_buf; // Send buffer

@@ -38,45 +38,78 @@
 using namespace std;
 
 /*
- ** Functions Declaration.
+ ** Functions Declaration
  */
-int network_create(netrx *ptrCliNet);
+int network_create(netrx *ptr_server_obj);
 
-int network_listen(netrx *ptrCliNet);
+int network_listen(netrx *ptr_server_obj);
 
-int gt_info_send(netrx *ptrCliNet);
+int receive_req_send_gt_info(netrx *ptr_server_obj);
+
+/*
+ ** Init
+ **
+ ** initialize the variables
+ */
+int Init(int argc , char *argv[], netrx *ptr_server_obj)
+{
+  char *serverIP;
+  int port;
+  char *csv_file_name;
+  
+  serverIP                 = argv[1];
+  port                     = atoi(argv[2]);
+  csv_file_name            = argv[3];
+  
+  ptr_server_obj->serverIP      = serverIP;
+  ptr_server_obj->port          = port;
+  ptr_server_obj->gt_filename   = csv_file_name;
+  
+  return 0;
+}
 
 /*
  ** gt_server_embedded
  **
- ** Network Create & Conenct to host clinet 
+ ** Network Create & Conenct to host clinet
  ** Receive the IMU DATA from client
  ** receive the request for require data
  ** Process the request
  ** Send the SL/TS data to client
  */
-int gt_server_embedded(netrx *cliNet)
+int run_gtApp(netrx *ptr_server_obj)
 {
   int ret_val;
   int socket_desc;
 
-  ret_val = network_create(cliNet);
+  ret_val = network_create(ptr_server_obj);
   if(ret_val < 0) {
     printf("\nError in network create:[%d] %s\n", errno, strerror(errno));
     return -1;
   }
 
-  socket_desc = network_listen(cliNet);
+  socket_desc = network_listen(ptr_server_obj);
   if(socket_desc < 0) {
     printf("Error in process_request: no.:[%d] %s\n", errno, strerror(errno));
     return -1;
   }
 
-  // receiving the IMU Data, Process it and send the Require GT info to client 
-  ret_val = gt_info_send(cliNet);
+  // receiving the IMU Data, Process it and send the Require GT info to client
+  ret_val = receive_req_send_gt_info(ptr_server_obj);
 
-  printf("\n@END: Sent the GT Inforamtion toc Client: %d\n", ret_val);
+  return 0;
+}
 
+/*
+ ** DeInit
+ **
+ ** De-Initialization of variables
+ */
+int DeInit(netrx *ptr_server_obj)
+{
+  // Close the Network
+  closesocket(ptr_server_obj->sock_desc_gt_bridge);
+  
   return 0;
 }
 
@@ -84,13 +117,11 @@ int gt_server_embedded(netrx *cliNet)
  ** Description
  **
  ** GT_Client information send to Host sever.
- ** for process the frame to create the ROI for Find D2L. 
+ ** for process the frame to create the ROI for Find D2L.
  */
 int main(int argc , char *argv[])
 {
-  char *serverIP;
-  int port;
-  char *csv_file_name;
+  
   int tot_arg = argc;
 
   if (tot_arg < 3) {
@@ -99,18 +130,19 @@ int main(int argc , char *argv[])
     return -1;
   }
 
-  netrx cliNet; // TODO use malloc to create netrx object.
+  netrx server_obj; // TODO use malloc to create netrx object.
 
-  serverIP                        = argv[1];
-  port                            = atoi(argv[2]);
-  csv_file_name                   = argv[3];
+  // initialize the variables
+  Init(argc, argv, &server_obj);
+     
+  // Run app > Network Conenct and sending Receive the IMU DATA from client 
+  // and send the SL/TS data to client
+  run_gtApp(&server_obj);
   
-  cliNet.serverIP                 = serverIP;
-  cliNet.port                     = port;
-  cliNet.gt_filename              = csv_file_name;
-  
-  // Network Conenct and sending Receive the IMU DATA from client and send the SL/TS data to client 
-  gt_server_embedded(&cliNet);
+  // De-Initialization 
+  DeInit(&server_obj);
 
+  printf("\n@END: Sent the GT Inforamtion toc Client.\n");
+  
   return 0;
 }

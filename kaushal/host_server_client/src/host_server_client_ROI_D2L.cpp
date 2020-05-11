@@ -134,7 +134,9 @@ int main(int argc, char* argv[])
 int gt_info_receive_frame_process(netrx* ptrCliNet)
 {
 	// Packet structure define
-	PACKET* ptr_metadata = (PACKET*) & (ptrCliNet->stPacket);
+	PACKET *ptr_metadata = (PACKET*) & (ptrCliNet->stPacket);
+
+	GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET*) & (ptrCliNet->stGtLanePacket);
 
 	int send_size;
 	int read_size;
@@ -172,8 +174,8 @@ int gt_info_receive_frame_process(netrx* ptrCliNet)
 	// Load the image files from folder in sequence
 	vector<cv::String> fn;
 	glob("D:/A7_measurement_14.4.20/ZIM212/*.png", fn, false); // ZIM 212
-	
-															   // to save the frames as video
+
+	// save the frames as video
 	VideoWriter wrOutVideo;
 	const String name = "./A7_south_processing.avi";
 
@@ -198,20 +200,20 @@ int gt_info_receive_frame_process(netrx* ptrCliNet)
 		file = fopen("A7_south_process.csv", "a");
 
 		// Host server recieves GT_Info from GT_Client
-		read_size = recv(ptrCliNet->sock_desc, (char*)ptr_metadata, sizeof(PACKET), 0);
+		read_size = recv(ptrCliNet->sock_desc, (char*)ptr_gtMetadata, sizeof(GT_LANE_PACKET), 0);
 		if (read_size < 0) {
 			printf("***Error in Receiving MetaData: [%d] : %s\n", errno, strerror(errno));
 			return -1;
 		}
 
-		if (read_size != sizeof(PACKET)) {
+		if (read_size != sizeof(GT_LANE_PACKET)) {
 			printf("***Error: RX METADATA PACKET got %d\n", read_size);
 		}
 
 		printf("read_size:%d\n", read_size);
 
 		// Display GT_D2L Data
-		printf("GT_D2L: %f cm\n", ptr_metadata->u4_ins_cm_d2l);
+		printf("\nGT_D2L: %f cm", ptr_gtMetadata->u4_gt_distance);
 
 		// to create the filenames in sequence for save the process frames
 		std::stringstream ss;
@@ -228,7 +230,7 @@ int gt_info_receive_frame_process(netrx* ptrCliNet)
 		imshow("img", frame);
 
 		// Convert the GT_D2L in mm
-		GTD2L = ptr_metadata->u4_ins_cm_d2l * 10; // convert in mm to get the pixels
+		GTD2L = ptr_gtMetadata->u4_gt_distance * 10; // convert in mm to get the pixels
 
 		// Convert the D2L in to pixels
 		pix_lane = GTD2L / PIXEL_DIST;

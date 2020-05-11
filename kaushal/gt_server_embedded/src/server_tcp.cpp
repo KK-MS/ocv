@@ -38,22 +38,22 @@
 using namespace std;
 
 //Function Declaration
-int receive_request(netrx *ptrCliNet);
+int receive_request(netrx *ptr_server_obj);
 
-int process_request(netrx *ptrCliNet);
+int process_request(netrx *ptr_server_obj);
 
-int execute_request(netrx *ptrCliNet);
+int execute_request(netrx *ptr_server_obj);
 
-int process_side_lane_info(netrx *ptrCliNet);
+int process_side_lane_info(netrx *ptr_server_obj);
 
-int process_Traffic_sign_info(netrx *ptrCliNet);
+int process_Traffic_sign_info(netrx *ptr_server_obj);
 
 /*
  ** gt_info_send
  **
  ** Send GT Information SideLane / TS to Host client
  */
-int gt_info_send(netrx *ptrCliNet)
+int receive_req_send_gt_info(netrx *ptr_server_obj)
 {
   int read_size;
   int send_size;
@@ -61,14 +61,14 @@ int gt_info_send(netrx *ptrCliNet)
   while(1) {
 
     // Wait for the client request
-    read_size = receive_request(ptrCliNet);
+    read_size = receive_request(ptr_server_obj);
     if(read_size < 0) {
       printf("Error in receive_request: no.:[%d] %s\n", errno, strerror(errno));
       return -1;
     }
 
     // Process the request
-    send_size = process_request(ptrCliNet);
+    send_size = process_request(ptr_server_obj);
 
     if(send_size < 0) {
       printf("Error in process_request: no.:[%d] %s\n", errno, strerror(errno));
@@ -85,9 +85,9 @@ int gt_info_send(netrx *ptrCliNet)
  **
  ** Receiving the Data from client
  */
-int receive_request(netrx *ptrCliNet)
+int receive_request(netrx *ptr_server_obj)
 {
-  int read_size = recv(ptrCliNet->sock_desc_gt_bridge, (char *)&(ptrCliNet->stPacket), sizeof(PACKET), 0);
+  int read_size = recv(ptr_server_obj->sock_desc_gt_bridge, (char *)&(ptr_server_obj->stPacket), sizeof(PACKET), 0);
 
   if ((read_size < 0)) {
     printf("Error in receive_request: Size: %d, Errno.: [%d] : %s\n", read_size,
@@ -95,7 +95,7 @@ int receive_request(netrx *ptrCliNet)
     return -1;
   }
 
-  printf("\nS> rx size:%d, rx req:0x%x \n", read_size, ptrCliNet->stPacket.u4_request_type);
+  printf("\nS> rx size:%d, rx req:0x%x \n", read_size, ptr_server_obj->stPacket.u4_request_type);
   return read_size;
 }
 
@@ -104,21 +104,21 @@ int receive_request(netrx *ptrCliNet)
  **
  ** Process the client Request
  */
-int process_request(netrx *ptrCliNet)
+int process_request(netrx *ptr_server_obj)
 {
   int retVal = 0;
-  int req_type =  ptrCliNet->stPacket.u4_request_type;
+  int req_type =  ptr_server_obj->stPacket.u4_request_type;
 
   printf("\nS> req: %d \n", req_type);
 
   switch(req_type) {
 
     case REQ_GT_LANE_INFO:
-      retVal = process_side_lane_info(ptrCliNet);
+      retVal = process_side_lane_info(ptr_server_obj);
       break;
 
     case REQ_GT_TRAFFIC_SIGN_INFO:
-      retVal = process_Traffic_sign_info(ptrCliNet);
+      retVal = process_Traffic_sign_info(ptr_server_obj);
       break;
 
     default:
@@ -133,11 +133,12 @@ int process_request(netrx *ptrCliNet)
  ** process_side_lane_info
  **
  ** Send the side Lane info to clinet
+ ** TODO: Consider using lat, long
  */
-int process_side_lane_info(netrx *ptrCliNet)
+int process_side_lane_info(netrx *ptr_server_obj)
 {
   // Packet structure define
-  PACKET *ptr_metadata = (PACKET *) &(ptrCliNet->stPacket);
+  GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
  
   // varibles fro GT_METADA csv file reading for create the ROI
   int row_count = 0;
@@ -147,7 +148,7 @@ int process_side_lane_info(netrx *ptrCliNet)
 
   int retVal = 0;
 
-  filename = ptrCliNet->gt_filename;
+  filename = ptr_server_obj->gt_filename;
 
   float GT_D2L; // in cm
 
@@ -155,15 +156,15 @@ int process_side_lane_info(netrx *ptrCliNet)
   ifstream  data(filename);
 
   // Skip the header line or first line of file
-  getline(data, row);  
+  getline(data, row);
 
   // read the GT_data line by line and send to client
   while (getline(data, row)) {
-  
+
     // get the needed GT_METDADA from csv file for process the frame in sequence
     row_count += 1;
 
-    std::stringstream  rowStream(row);
+    stringstream  rowStream(row);
     string        cell;
     int column_count = 0;
 
@@ -182,16 +183,16 @@ int process_side_lane_info(netrx *ptrCliNet)
           Skip = false;
         }
         GT_D2L = stof(cell);
-        std::cout << endl << cell << " row " << row_count << " column " << column_count << "  Dist: " << GT_D2L;
+        cout << endl << cell << " row " << row_count << " column " << column_count << "  Dist: " << GT_D2L;
       }
     }
-    ptr_metadata->u4_ins_cm_d2l = GT_D2L;
-	
+    ptr_gtMetadata->u4_gt_distance = GT_D2L;
+
     //Send the Metadata to client
-    retVal = execute_request(ptrCliNet);
-		
+    retVal = execute_request(ptr_server_obj);
+
   } // loop
-	
+
   return retVal;
 }
 
@@ -200,11 +201,11 @@ int process_side_lane_info(netrx *ptrCliNet)
  **
  ** Send the Traffic sign info to clinet
  */
-int process_Traffic_sign_info(netrx *ptrCliNet)
+int process_Traffic_sign_info(netrx *ptr_server_obj)
 {
   // Packet structure define
-  PACKET *ptr_metadata = (PACKET *) &(ptrCliNet->stPacket);
- 
+  GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
+
   // varibles fro GT_METADA csv file reading for create the ROI
   int row_count = 0;
   string row;
@@ -213,23 +214,23 @@ int process_Traffic_sign_info(netrx *ptrCliNet)
 
   int retVal = 0;
 
-  filename = ptrCliNet->gt_filename;
-  
+  filename = ptr_server_obj->gt_filename;
+
   float GT_D2L; // in cm
 
   // Open the GT_METADA csv file for create the ROI for D2TS processing in frame
   ifstream  data(filename);
 
   // Skip the header line or first line of file
-  getline(data, row);  
+  getline(data, row);
 
   // read the GT_data line by line and send to client
   while (getline(data, row)) {
-	  
+
     // get the needed GT_METDADA from csv file for process the frame in sequence
     row_count += 1;
 
-    std::stringstream  rowStream(row);
+    stringstream  rowStream(row);
     string        cell;
     int column_count = 0;
 
@@ -248,15 +249,15 @@ int process_Traffic_sign_info(netrx *ptrCliNet)
           Skip = false;
         }
         GT_D2L = stof(cell);
-        std::cout << endl << cell << " row " << row_count << " column " << column_count << "  Dist: " << GT_D2L;
+        cout << endl << cell << " row " << row_count << " column " << column_count << "  Dist: " << GT_D2L;
       }
     }
-    ptr_metadata->u4_ins_cm_d2l = GT_D2L;
+    ptr_gtMetadata->u4_gt_distance = GT_D2L;
 
     //Send the Metadata to client
-    retVal = execute_request(ptrCliNet);
+    retVal = execute_request(ptr_server_obj);
   } // loop
-	
+
   return retVal;
 }
 
@@ -265,15 +266,15 @@ int process_Traffic_sign_info(netrx *ptrCliNet)
  **
  ** sending the Data to client
  */
-int execute_request(netrx *ptrCliNet)
+int execute_request(netrx *ptr_server_obj)
 {
   // Packet structure define
-  PACKET *ptr_metadata = (PACKET *) &(ptrCliNet->stPacket);
+  GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
   
   int send_size;
   
   // Send the GT_data to client
-  send_size = send(ptrCliNet->sock_desc_gt_bridge, (char*)ptr_metadata, sizeof(PACKET), 0);
+  send_size = send(ptr_server_obj->sock_desc_gt_bridge, (char*)ptr_gtMetadata, sizeof(GT_LANE_PACKET), 0);
 
   if(send_size < 0) {
     printf("***Error in Sending Data to client: Error no.:[%d] : %s\n"

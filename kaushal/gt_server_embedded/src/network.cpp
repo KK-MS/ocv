@@ -35,11 +35,11 @@ using namespace std;
  **
  ** Create the network for listen the  Host client
  */
-int network_create(netrx *ptrCliNet)
+int network_create(netrx *ptr_server_obj)
 {
-  WSADATA wsa;   
-  char *serverIP = ptrCliNet->serverIP;
-  int port       = ptrCliNet->port;
+  WSADATA wsa;
+  char *serverIP = ptr_server_obj->serverIP;
+  int port       = ptr_server_obj->port;
   int socket_desc_gt_bridge;
 
   struct sockaddr_in server, client;
@@ -84,7 +84,7 @@ int network_create(netrx *ptrCliNet)
   puts("Bind done");
   fflush(stdout);
 
-  ptrCliNet->bind_sock_desc_gt_bridge = socket_desc_gt_bridge;
+  ptr_server_obj->bind_sock_desc_gt_bridge = socket_desc_gt_bridge;
 
   return socket_desc_gt_bridge;
 }
@@ -94,13 +94,13 @@ int network_create(netrx *ptrCliNet)
  **
  ** Listen the Host client(windows) and connection established.
  **/
-int network_listen(netrx *ptrCliNet)
+int network_listen(netrx *ptr_server_obj)
 {
-  int socket_desc_gt_bridge = ptrCliNet->bind_sock_desc_gt_bridge;
+  int socket_desc_gt_bridge = ptr_server_obj->bind_sock_desc_gt_bridge;
   int socket_desc;
   struct sockaddr_in client;
   int length;
-    
+
   memset(&client,0,sizeof(client));
 
   //Listen to incoming connections
@@ -117,8 +117,8 @@ int network_listen(netrx *ptrCliNet)
   puts("Connection accepted");
   fflush(stdout);
 
-  ptrCliNet->sock_desc_gt_bridge = socket_desc;
-  
+  ptr_server_obj->sock_desc_gt_bridge = socket_desc;
+
   printf("\n GT_BRIDGE Server Created.:%d\n", socket_desc);
 
   return socket_desc;

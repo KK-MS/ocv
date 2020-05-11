@@ -20,7 +20,6 @@
 * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 * THE POSSIBILITY OF SUCH DAMAGE.
 *
-*
 ****************************************************************************/
 
 #ifndef PACKET_H
@@ -55,6 +54,7 @@ enum request_type {
 
 // Main request packet
 typedef struct packet {
+	
 	// Request type
 	unsigned int u4_request_type;      //< Request type: METADATA, FRAMEDATA ,LAN INFO
 
@@ -62,9 +62,7 @@ typedef struct packet {
 	double        u4_timestampL;       //< Timestamp Low bytes to sync the data
 	unsigned int  u4_timestampH;       //< Timestamp High bytes to sync the data
 	float         u4_ins_confidence;   //< INS GPS coordinates confidence/Satellite
-	//float         u4_ins_reserved1;    //< Reserved for future
-	//loat          u4_ins_TSign_ds;     //< Reserved for future
-	float         u4_ins_cm_d2l;     //< Reserved for future
+	float         u4_ins_cm_d2l;       //< Reserved for future
 	float         u4_ins_latitude;     //< INS latitude
 	float         u4_ins_longitude;    //< INS longitude
 	float         u4_ins_elevation;    //< INS elevation [Optional]
@@ -78,22 +76,20 @@ typedef struct packet {
 	unsigned int  u4_frame_resolution; //< Image resolution
 	unsigned int  u4_frame_type;       //< JPEG, etc.
 	unsigned int  u4_frame_reserved2;  //< Reserved
-    //unsigned int  u4_frame_cm_range;   //< Reserved
 	
 	// TBD Atlatec other info
 	// TBD Ground truth. Lane info, landmark info
 
 	// Odometry
-	//float  u4_odo_vhcl_yaw;  //< Odometry calculated distance
-	float  u4_odo_distance;  //< Odometry calculated distance
-	float  u4_odo_angle;     //< Relative object angle
-	float  u4_odo_reserved1; //< Reserved
-	float  u4_odo_reserved2; //< Reserved
+	float  u4_odo_distance;            //< Odometry calculated distance
+	float  u4_odo_angle;               //< Relative object angle
+	float  u4_odo_reserved1;           //< Reserved
+	float  u4_odo_reserved2;           //< Reserved
 
 	// Odometry out parameters
-	float u4_out_odo_latitude;   //< Odometry calculated latitude
-	float u4_out_odo_longitude;  //< Odometry calculated longitude
-    float u4_out_odo_confidence; //< Odometry calculated confidence
+	float u4_out_odo_latitude;         //< Odometry calculated latitude
+	float u4_out_odo_longitude;        //< Odometry calculated longitude
+    float u4_out_odo_confidence;       //< Odometry calculated confidence
 
 } PACKET;
 
@@ -104,14 +100,14 @@ typedef struct gt_lane_packet{
 	unsigned int u4_response_type;
 
 	// Genesys
-	unsigned long u8_timestamp;      //< Timestamp to sync the data
+	unsigned int  u8_timestamp;      //< Timestamp to sync the data
 	unsigned int  u4_ins_latitude;   //< INS latitude
 	unsigned int  u4_ins_longitude;  //< INS longitude
 
-	unsigned int  u4_gt_latitude;   //< GT latitude
-	unsigned int  u4_gt_longitude;  //< GT longitude
+	unsigned int  u4_gt_latitude;    //< GT latitude
+	unsigned int  u4_gt_longitude;   //< GT longitude
 
-	unsigned int  u4_gt_distance;   //< Distance between INX and GT coordinates
+	float         u4_gt_distance;    //< Distance between INX and GT coordinates
 
 } GT_LANE_PACKET;
 
