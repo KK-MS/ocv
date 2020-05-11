@@ -100,14 +100,14 @@ typedef struct gt_lane_packet{
 	unsigned int u4_response_type;
 
 	// Genesys
-	unsigned int  u8_timestamp;      //< Timestamp to sync the data
-	unsigned int  u4_ins_latitude;   //< INS latitude
-	unsigned int  u4_ins_longitude;  //< INS longitude
+	float  u4_timestamp;      //< Timestamp to sync the data
+	float  u4_ins_latitude;   //< INS latitude
+	float  u4_ins_longitude;  //< INS longitude
 
-	unsigned int  u4_gt_latitude;    //< GT latitude
-	unsigned int  u4_gt_longitude;   //< GT longitude
+	float  u4_gt_latitude;    //< GT latitude
+	float  u4_gt_longitude;   //< GT longitude
 
-	float         u4_gt_distance;    //< Distance between INX and GT coordinates
+	float  u4_gt_distance;    //< Distance between INX and GT coordinates
 
 } GT_LANE_PACKET;
 

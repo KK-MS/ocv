@@ -213,7 +213,11 @@ int gt_info_receive_frame_process(netrx* ptrCliNet)
 		printf("read_size:%d\n", read_size);
 
 		// Display GT_D2L Data
+		printf("\nTime: %f cm", ptr_gtMetadata->u4_timestamp);
+		printf("\nLat: %f cm", ptr_gtMetadata->u4_ins_latitude);
+		printf("\nLon: %f cm", ptr_gtMetadata->u4_ins_longitude);
 		printf("\nGT_D2L: %f cm", ptr_gtMetadata->u4_gt_distance);
+
 
 		// to create the filenames in sequence for save the process frames
 		std::stringstream ss;

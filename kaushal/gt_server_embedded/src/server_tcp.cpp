@@ -150,7 +150,10 @@ int process_side_lane_info(netrx *ptr_server_obj)
 
   filename = ptr_server_obj->gt_filename;
 
-  float GT_D2L; // in cm
+  float time;
+  float lat;
+  float lon;
+  //float GT_D2L; // in cm
 
   // Open the GT_METADA csv file for create the ROI for D2L processing in frame
   ifstream  data(filename);
@@ -162,31 +165,40 @@ int process_side_lane_info(netrx *ptr_server_obj)
   while (getline(data, row)) {
 
     // get the needed GT_METDADA from csv file for process the frame in sequence
-    row_count += 1;
-
+   
     stringstream  rowStream(row);
-    string        cell;
-    int column_count = 0;
+    string t_stamp;
+    string latitude;
+    string longitude;
 
-    // extract the words from row in to columns
-    while (getline(rowStream, cell, ',')) {
+    // extract the words from row in to columns in sequence
+    getline(rowStream, t_stamp, ',');
+    getline(rowStream, latitude, ',');
+    getline(rowStream, longitude, ',');
 
-      column_count += 1;
+    // check the cell, if empty then replace with 0 or NULL
+    if (latitude.empty() && Skip) {
 
-      // You have a cell of GT_D2L
-      if (column_count == 5) {
-
-        // check the cell, if empty then replace with 0
-        if (cell.empty() && Skip) {
-
-          cell = "0";
-          Skip = false;
-        }
-        GT_D2L = stof(cell);
-        cout << endl << cell << " row " << row_count << " column " << column_count << "  Dist: " << GT_D2L;
-      }
+      latitude = "NULL";
+      Skip = false;
     }
-    ptr_gtMetadata->u4_gt_distance = GT_D2L;
+
+    if(longitude.empty() && Skip) {
+
+      longitude = "NULL";
+      Skip = false;
+    }
+
+	// convert the data from string to numbers
+    time = stof(t_stamp);
+    lat = stof(latitude);
+    lon = stof(longitude);
+        
+    cout << endl << "Time: " << time << "\tLat: " << lat << "\tlon: " << lon; 
+        
+    ptr_gtMetadata->u4_timestamp = time;
+    ptr_gtMetadata->u4_ins_latitude= lat;
+    ptr_gtMetadata->u4_ins_longitude = lon;
 
     //Send the Metadata to client
     retVal = execute_request(ptr_server_obj);
