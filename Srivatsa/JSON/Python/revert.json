@@ -1,0 +1,1 @@
+"{\"Features\": [{\"Feature_activated\": \"ACC\", \"ID\": \"ACC_01\", \"name\": \"Automatic Cruise Control\", \"color\": \"Green\", \"Output_1\": \"ACC Detected\", \"Output_2\": \"Unable to detect the green light\", \"Output_3\": \"Image is not valid\", \"Output_4\": \"Confidence level is upto 90 percent\"}], \"roi\": [{\"x\": 800, \"y\": 150, \"Height\": 300, \"Width\": 500}]}"
