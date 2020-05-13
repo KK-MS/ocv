@@ -98,6 +98,31 @@ The two JSON files used are as follows. these files are used to run the [JSON_pa
 
 * [anayat_LKAS.json](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/JSON_Files/anayat_LKAS.json)
 
+## C++
+
+Although cJSON can be used for c and c++, it is not possible to run the cJSON library on c++ compiler. Thus it must be taken care that the library is initially run on c compiler and then link to the c++ code. 
+
+Another way is to use nlohmann library for c++ 
+
+[nlohmann/json](https://github.com/nlohmann/json) : The functionalities of this library is fairly similar to cJSON, further details on functions can be obtained by clicking on the link.
+
+## Python
+
+In python, the json library is imported by using the following command.
+
+"import json"
+
+In Python folder, there are two files 
+
+* [JSON.py](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/Python/JSON.py)
+
+This python file contains basic demo on how to use JSON library. It involves reading a hard-coded string, reading a file and also convert the text to JSON string and write a file
+
+* [revert.json](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/Python/revert.json)
+
+This file is obtained when python code was run to write the text to JSON string format
+
+
 ## References 
 
 * [JSON basics](https://www.youtube.com/watch?v=uw_rP5bV9r0) 
