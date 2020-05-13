@@ -68,12 +68,39 @@ For example:- {"Name":"XX", "Age":"1000"}
 
 * Square brackets holds array []
 
-# JSON Fundamentals
+## FOLDERS
 
-To be added
+In JSON folder, there are 3 folders which are as follows
 
-## SRC and LIB Folders
+#### src
 
-In this folder, there are two folders namely src and lib. The lib folder contains the library needed for JSON Parser (cJSON). 
-In src folder, there are two programs namely test.cpp and JSON_parse.cpp. In test.cpp, the program creates a JSON object. The input is text in a structured format. The structure is mentioned in the code and it should be in that format. 
-In JSON_parse.cpp, the code takes in a JSON string and converts it to text and prints it on the console window.
+This folder contains all the source code needed for JSON parsing. There are 3 files 
+
+* [test.cpp](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/src/test.cpp):- In this file, it showcases about the creation of JSON object.
+
+* [JSON_Parse.cpp](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/src/JSON_Parse.cpp):- In this file, the input is a JSON string and outputs the text from the string. It is done by parsing JSON in C
+
+* [JSON_parse_file_read.cpp](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/src/JSON_parse_file_read.cpp):- In this file, the input is given as a JSON file and outputs the text from the file. It is done by parsing JSON in C.
+
+#### Lib
+
+This folder contains the libraries needed for parsing JSON in C/C++. There are two files
+
+* [cJSON.h](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/lib/cJSON.h):- This file must be included in the code. This is important as this helps in JSON parsing. 
+
+* [cJSON.c](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/lib/cJSON.c):- In order to increase the functionalities, this file must be attached in your project source and this file needs to be built along with the source code. This file contains most of the functions and thus improves the functionalities.
+
+#### JSON files
+
+The two JSON files used are as follows. these files are used to run the [JSON_parse_file_read.cpp](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/src/JSON_parse_file_read.cpp) file. 
+
+* [anayat_ACC.json](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/JSON_Files/anayat_ACC.json)
+
+* [anayat_LKAS.json](https://github.com/KK-MS/ocv/blob/ZIM-221-JSON/Srivatsa/JSON/JSON_Files/anayat_LKAS.json)
+
+## References 
+
+* [JSON basics](https://www.youtube.com/watch?v=uw_rP5bV9r0) 
+
+* [cJSON Library](https://github.com/DaveGamble/cJSON) for additional references
+
