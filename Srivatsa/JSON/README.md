@@ -11,7 +11,7 @@ JSON (JavaScript Object Notation) is a syntax for storing and exchanging data. I
 * As per Wikipedia, JSON is an open standard file format and data interchange format, that uses human-readable text to store and transmit dataobjects consisting of attribute-value pairs and array data types.
 
 * It is a very common data type used in many applications such as Microsoft Azure (where they use JSON defined templates in order to deploy the application in the cloud).
-It is also being considered as a replacemnt for XML (Extensible Mark-up Language) in AJAX (Asynchronous Javascript and XML) Systems.
+It is also being considered as a replacement for XML (Extensible Mark-up Language) in AJAX (Asynchronous Javascript and XML) Systems.
 
 * JSON is a language-independent data format. It was derived from JavaScript, but many programming languages include code to generate and parse JSON format data. JSON Filenames use the extension - **"file.json"**
 
@@ -41,7 +41,7 @@ XML stands for Extensible MarkUp Language. Both the formats are used for the sam
 JSON is far better as XML is much more difficult to parse. 
 In case of JSON, it is parsed into a ready-to-use JavaScript object making it easier and simple.
 
-For Example:- In case of AJAX applicatiosn, JSON is comparitively faster compared to XML. 
+For Example:- In case of AJAX application, JSON is comparatively faster compared to XML. 
 The process of JSON and XML are shown in the table.
 
 # Syntax Rules in JSON
