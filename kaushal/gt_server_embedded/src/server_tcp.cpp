@@ -42,7 +42,8 @@ int receive_request(netrx *ptr_server_obj);
 
 int process_request(netrx *ptr_server_obj);
 
-int execute_request(netrx *ptr_server_obj);
+//int execute_request(netrx *ptr_server_obj);
+int execute_request(GT_LANE_PACKET *ptr_gtMetadata, netrx *ptr_server_obj);
 
 int process_side_lane_info(netrx *ptr_server_obj);
 
@@ -138,7 +139,6 @@ int process_request(netrx *ptr_server_obj)
 int process_side_lane_info(netrx *ptr_server_obj)
 {
   // Packet structure define
-  //GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
   GT_LANE_PACKET ptr_gtMetadata [ROW_NUM];
 
   // varibles fro GT_METADA csv file reading for create the ROI
@@ -158,10 +158,7 @@ int process_side_lane_info(netrx *ptr_server_obj)
   // Skip the header line or first line of file
   getline(data, row);
 
-  printf("Reading the data from csv file...Rows: %d\n\n", ROW_NUM);
-  
   // read the GT_data line by line and send to client
-  //for (int counter = 0; counter < ROW_NUM; counter++){
   while(getline(data, row)) {
    
     // get the needed GT_METDADA from csv file for process the frame in sequence
@@ -193,26 +190,18 @@ int process_side_lane_info(netrx *ptr_server_obj)
 	ptr_gtMetadata[counter].f4_ins_latitude = stof(latitude);
 	ptr_gtMetadata[counter].f4_ins_longitude = stof(longitude);
    	
-	counter ++;
+	printf("\nRow %d: %f\t%f\t%f\n", counter
+	    , ptr_gtMetadata[counter].f4_timestamp
+		, ptr_gtMetadata[counter].f4_ins_latitude
+		, ptr_gtMetadata[counter].f4_ins_longitude);
+		
+    //Send the Metadata to client
+    retVal = execute_request(ptr_gtMetadata, ptr_server_obj );
+
+    counter ++;  	
   } // loop_csv_file_read_in_struct_array
   
-  // send the METADATA to client
-   printf("print the CSV_file data...\n");
-  for (int sendCounter = 0; sendCounter < ROW_NUM; sendCounter++)
-  {
-    printf("\nRow %d: %f\t%f\t%f\t%f\t%f\n", sendCounter
-	    , ptr_gtMetadata[sendCounter].f4_timestamp
-		, ptr_gtMetadata[sendCounter].f4_ins_latitude
-		, ptr_gtMetadata[sendCounter].f4_ins_longitude);
-  }
-  
-  //Send the Metadata to client
-  retVal = execute_request(ptr_server_obj);
-  
-  //int send_size = send(ptr_server_obj->sock_desc_gt_bridge, (char*)ptr_gtMetadata, sizeof(GT_LANE_PACKET), 0);
-  //printf("send Size: %d\n", send_size);
-
-  return retVal;
+   return retVal;
 }
 
 /*
@@ -274,7 +263,7 @@ int process_Traffic_sign_info(netrx *ptr_server_obj)
     ptr_gtMetadata->f4_gt_distance = GT_D2L;
 
     //Send the Metadata to client
-    retVal = execute_request(ptr_server_obj);
+    //retVal = execute_request(ptr_server_obj);
   } // loop
 
   return retVal;
@@ -285,13 +274,8 @@ int process_Traffic_sign_info(netrx *ptr_server_obj)
  **
  ** sending the Data to client
  */
-int execute_request(netrx *ptr_server_obj)
-{
-  // Packet structure define
-  //GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
-  
-  GT_LANE_PACKET  ptr_gtMetadata [ROW_NUM];
-    
+int execute_request(GT_LANE_PACKET *ptr_gtMetadata, netrx *ptr_server_obj)
+{     
   int send_size;
   
   // Send the GT_data to client
