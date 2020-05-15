@@ -27,6 +27,8 @@
 
 #include "packet.h"
 
+#define ROW_NUM 428
+
 // Namespace
 using namespace std;
 
@@ -40,7 +42,7 @@ typedef struct netrx {
 
   // GT Lane packet
   GT_LANE_PACKET stGtLanePacket;
-
+  
   int sock_desc;
   int sock_desc_gt;
   int sock_desc_gt_bridge;

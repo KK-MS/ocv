@@ -138,34 +138,33 @@ int process_request(netrx *ptr_server_obj)
 int process_side_lane_info(netrx *ptr_server_obj)
 {
   // Packet structure define
-  GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
- 
+  //GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
+  GT_LANE_PACKET ptr_gtMetadata [ROW_NUM];
+
   // varibles fro GT_METADA csv file reading for create the ROI
-  int row_count = 0;
   string row;
   bool Skip = true;
   char *filename;
-
+  int counter = 0;
+  int sendCounter = 0;
   int retVal = 0;
 
   filename = ptr_server_obj->gt_filename;
 
-  float time;
-  float lat;
-  float lon;
-  //float GT_D2L; // in cm
-
+  printf("Load the CSV_file...\n");
   // Open the GT_METADA csv file for create the ROI for D2L processing in frame
   ifstream  data(filename);
 
   // Skip the header line or first line of file
   getline(data, row);
 
+  printf("Reading the data from csv file...Rows: %d\n\n", ROW_NUM);
+  
   // read the GT_data line by line and send to client
-  while (getline(data, row)) {
-
-    // get the needed GT_METDADA from csv file for process the frame in sequence
+  //for (int counter = 0; counter < ROW_NUM; counter++){
+  while(getline(data, row)) {
    
+    // get the needed GT_METDADA from csv file for process the frame in sequence
     stringstream  rowStream(row);
     string t_stamp;
     string latitude;
@@ -190,20 +189,28 @@ int process_side_lane_info(netrx *ptr_server_obj)
     }
 
 	// convert the data from string to numbers
-    time = stof(t_stamp);
-    lat = stof(latitude);
-    lon = stof(longitude);
-        
-    cout << endl << "Time: " << time << "\tLat: " << lat << "\tlon: " << lon; 
-        
-    ptr_gtMetadata->u4_timestamp = time;
-    ptr_gtMetadata->u4_ins_latitude= lat;
-    ptr_gtMetadata->u4_ins_longitude = lon;
-
-    //Send the Metadata to client
-    retVal = execute_request(ptr_server_obj);
-
-  } // loop
+	ptr_gtMetadata[counter].f4_timestamp = stof(t_stamp);
+	ptr_gtMetadata[counter].f4_ins_latitude = stof(latitude);
+	ptr_gtMetadata[counter].f4_ins_longitude = stof(longitude);
+   	
+	counter ++;
+  } // loop_csv_file_read_in_struct_array
+  
+  // send the METADATA to client
+   printf("print the CSV_file data...\n");
+  for (int sendCounter = 0; sendCounter < ROW_NUM; sendCounter++)
+  {
+    printf("\nRow %d: %f\t%f\t%f\t%f\t%f\n", sendCounter
+	    , ptr_gtMetadata[sendCounter].f4_timestamp
+		, ptr_gtMetadata[sendCounter].f4_ins_latitude
+		, ptr_gtMetadata[sendCounter].f4_ins_longitude);
+  }
+  
+  //Send the Metadata to client
+  retVal = execute_request(ptr_server_obj);
+  
+  //int send_size = send(ptr_server_obj->sock_desc_gt_bridge, (char*)ptr_gtMetadata, sizeof(GT_LANE_PACKET), 0);
+  //printf("send Size: %d\n", send_size);
 
   return retVal;
 }
@@ -264,7 +271,7 @@ int process_Traffic_sign_info(netrx *ptr_server_obj)
         cout << endl << cell << " row " << row_count << " column " << column_count << "  Dist: " << GT_D2L;
       }
     }
-    ptr_gtMetadata->u4_gt_distance = GT_D2L;
+    ptr_gtMetadata->f4_gt_distance = GT_D2L;
 
     //Send the Metadata to client
     retVal = execute_request(ptr_server_obj);
@@ -281,8 +288,10 @@ int process_Traffic_sign_info(netrx *ptr_server_obj)
 int execute_request(netrx *ptr_server_obj)
 {
   // Packet structure define
-  GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
+  //GT_LANE_PACKET *ptr_gtMetadata = (GT_LANE_PACKET *) &(ptr_server_obj->stGtLanePacket);
   
+  GT_LANE_PACKET  ptr_gtMetadata [ROW_NUM];
+    
   int send_size;
   
   // Send the GT_data to client
@@ -294,6 +303,6 @@ int execute_request(netrx *ptr_server_obj)
     return -1;
   }
 
-  printf("\nsend Size: %d\n", send_size);
+  printf("send Size: %d\n", send_size);
   return send_size;
 }
