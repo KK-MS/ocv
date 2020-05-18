@@ -1,0 +1,22 @@
+{
+    "Features": [
+        {
+            "Feature_activated": "LKAS",
+            "ID": "lkas_01",
+            "name": "LKAS_RightSide",
+            "color": "Red",
+            "Output_1": "LKAS red light detected",
+            "Output_2": "Unable to detect the red light",
+            "Output_3": "Image is not valid",
+            "Output_4": "Confidence level is upto 80 percent"
+        }
+    ],
+    "roi": [
+        {
+            "x": 220,
+            "y": 185,
+            "Height": 250,
+            "Width": 250
+        }
+    ]
+}

@@ -1,0 +1,96 @@
+{
+    {
+        "Shape": "Rectangle",
+        "Color": "Yellow",
+        "Text": "Kempten 5KM AHEAD",
+        "gt": [
+            {
+                "gt_lat": 37.7668,
+                "gt_long": -1.223959e+2,
+                "gt_bearing": 433.656
+            }
+        ],
+        "image": [
+            {
+                "img_lat": 7425.14253,
+                "img_long": 42.1235,
+                "img_bearing": 475.0102
+            }
+        ],
+        "db": [
+            {
+                "ROI_X": 500,
+                "ROI_Y": 500,
+                "Frame_Height": 1280,
+                "Frame_Width": 720,
+                "Color_Detected": "RED-COLOR",
+                "OUTPUT": "RED_DETECTED"
+            }
+        ]
+    },
+    {
+        "Shape": "Circle",
+        "Color": "Red",
+        "Text": "120",
+        "gt": [
+            {
+                "gt_lat": 12.4646,
+                "gt_long": -124.223959e+2,
+                "gt_bearing": 430363.656
+            }
+        ],
+        "image": [
+            {
+                "img_lat": 74625.14253,
+                "img_long": 42641.1235,
+                "img_bearing": 4731305.0102
+            }
+        ]
+        "db": [
+            {
+                "ROI_X": 500,
+                "ROI_Y": 500,
+                "Frame_Height": 1280,
+                "Frame_Width": 720,
+                "Color_Detected": "GREEN-COLOR",
+                "OUTPUT": "GREEN_DETECTED"
+            }
+        ]
+    },
+    {
+        "Shape": "Octagon",
+        "Color": "Red",
+        "Text": "STOP",
+        "gt": [
+            {
+                "gt_lat": 37.76681461,
+                "gt_long": -1.223959464e+2,
+                "gt_bearing": 433.6563234
+            }
+        ],
+        "image": [
+            {
+                "img_lat": 7425.1425326165463,
+                "img_long": 42.12331397465,
+                "img_bearing": 475.01023136497941
+            }
+        ],
+        "db": [
+            {
+                "ROI_X": 500,
+                "ROI_Y": 500,
+                "Frame_Height": 1280,
+                "Frame_Width": 720,
+                "Color_Detected": "NO_Color",
+                "OUTPUT": "NO_COLOR_DETECTED"
+            }
+        ]
+    }
+}
+
+////////////////////////
+
+
+
+"{ {\"Shape\": \"Rectangle\",\ "Color\": \"Yellow\",\"Text\": \"Kempten 5KM AHEAD\",\"gt\": [{\"gt_lat\": 37.7668,\"gt_long\": -1.223959e+2,\"gt_bearing\": 433.656}]}}"
+        
