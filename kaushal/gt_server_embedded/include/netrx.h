@@ -42,7 +42,8 @@ typedef struct netrx {
 
   // GT Lane packet
   GT_LANE_PACKET stGtLanePacket;
-  
+  GT_LANE_PACKET ptr_gtMetadata[ROW_NUM];
+
   int sock_desc;
   int sock_desc_gt;
   int sock_desc_gt_bridge;
