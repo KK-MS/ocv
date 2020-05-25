@@ -29,6 +29,21 @@ struct parameters
 	//which color to detect
 	int color;
 };
+
+// TODO: fill_input_parameters_from_file
+// Step-1: getting parameters is independent:
+//   OpenCV events Up-arrow => X, Y,
+//   Browser events
+//   => this events/values to JSON: "input_json"
+//
+// Step-2: Important: Covert JSON parameters as per
+// Application structure.
+//   2.1. JSON string parsing and filling to structure
+//   2.2. Process algorithm
+//   2.3. other
+//
+// File or JSON String.
+// Main core algorithm function: JSON String
 void get_input_parameters(parameters* Ptr, cv::Mat img)
 {
 	parameters P;
@@ -142,12 +157,16 @@ void detect_sign(parameters* ptr, cv::Mat ROI)
 	return void();
 }
 
+// TODO: Add comments
 int main(int argc, char** argv)
 {
+  // TODO: rename as per standard
+  // TODO: use malloc
 	parameters P;
 	char name[50];
 	while (1)
 	{
+    // INPUT: Get images
 		for (int i = 0; i <= 2; i++)
 		{
 			sprintf_s(name, "C:/images/image%d.png", i);
@@ -157,7 +176,10 @@ int main(int argc, char** argv)
 				printf("image not loaded");
 				break;
 			}
+
+      // INPUT: Get parameters
 			get_input_parameters(&P, img);
+
 			detect_sign(&P, ROI);
 			ofstream myfile;
 			myfile.open("output.txt");
