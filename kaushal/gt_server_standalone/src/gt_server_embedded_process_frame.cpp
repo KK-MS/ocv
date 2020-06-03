@@ -19,7 +19,7 @@ using namespace cv;
 #define END_Y        START_Y  // 380
 #define FRAME_WIDTH  640      // 1280 // 640
 
-#define PIXEL_DIST   2.1      // in to mm  by calibration
+#define PIXEL_DIST   2.1      // in to mm  by calibration // 2.28
 
 int process_frame(netrx* ptr_server_obj)
 {
@@ -62,7 +62,7 @@ int process_frame(netrx* ptr_server_obj)
 	GTD2L = GT_D2L * 1000;
 
 	// Convert the D2L in to pixels
-	pix_lane = GTD2L / PIXEL_DIST - 150;
+	pix_lane = GTD2L / PIXEL_DIST;
 
 	// GT point on Lnae (x,y)
 	GT_point_lane_x = START_X + pix_lane;
@@ -71,10 +71,10 @@ int process_frame(netrx* ptr_server_obj)
 #if 0
 	// Auto ROI create based on GT_D2L
 	//create the points (x1, y1, x2, Y2) fro ROI
-	ROI_x1 = GT_point_lane_x - 20;
-	ROI_y1 = GT_point_lane_y - 20;
-	ROI_x2 = 40;
-	ROI_y2 = 40;
+	ROI_x1 = GT_point_lane_x - 25;
+	ROI_y1 = GT_point_lane_y - 25;
+	ROI_x2 = 50;
+	ROI_y2 = 50;
 #endif
 
 #if 1

@@ -9,22 +9,17 @@
 
 using namespace std;
 
-int bearing_angle90deg(netrx* ptr_server_obj)
+int bearing_angle90deg(int roadBearing)
 {
-	// Packet structure define
-	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
-
-	int bearing = ptr_metadata->u4_ins_bearing;
-
-	if (bearing >= 90)
-		bearing = bearing - 90;
+	if (roadBearing >= 90)
+		roadBearing = roadBearing - 90;
 	else
-		bearing = 360 + bearing - 90;
+		roadBearing = 360 + roadBearing - 90;
 
-	return bearing;
+	return roadBearing;
 }
 
-int LandmarkOdometry(netrx* ptr_server_obj, int bearingAngle_rot, int roadBearing)
+int LandmarkOdometry(netrx* ptr_server_obj, int bearingAngle_rot)
 {
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
@@ -68,18 +63,6 @@ int LandmarkOdometry(netrx* ptr_server_obj, int bearingAngle_rot, int roadBearin
 	ptr_gtMetadata->d8_gt_longitude = lon_new;
 
 	printf("\nLat_new: %.8f, Lon_new: %.8f\n", lat_new, lon_new);
-
-	// distance line positive distance measure
-	if ((ins_bearing >= 355) && (roadBearing <= 5))
-	{
-		GT_D2L = sin((360 - ins_bearing + roadBearing) * M_PI / 180) * abs(GT_d2l);
-	}
-	else {
-
-		GT_D2L = sin((ins_bearing - roadBearing) * M_PI / 180) * abs(GT_d2l);
-	}
-
-	printf("\nD2L_corrected: %f m", GT_D2L);
 
 	return 0;
 }

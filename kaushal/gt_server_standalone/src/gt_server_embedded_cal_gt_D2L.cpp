@@ -9,7 +9,7 @@
 
 using namespace std;
 
-int cal_D2L_bearing(netrx* ptr_server_obj)
+int cal_D2L_bearing(netrx* ptr_server_obj, int roadBearing)
 {
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
@@ -43,11 +43,7 @@ int cal_D2L_bearing(netrx* ptr_server_obj)
 
 	// Distance between the two GPS points
 	float GT_d2l = sqrt(pow(sy, 2) + pow(sx, 2));
-
-	ptr_gtMetadata->f4_gt_distance = GT_d2l;
-
-	printf("\nD2L: %fm", GT_d2l);
-
+	
 	// Calcualte the INS_bearing angle
 	// arctan2 - angle in rad
 	float angle_rad = atan2(sx, sy);
@@ -69,6 +65,22 @@ int cal_D2L_bearing(netrx* ptr_server_obj)
 	ptr_metadata->u4_ins_bearing = bearingAngle;
 
 	printf("\nBearing_angle: %d\n", bearingAngle);
+
+	// distance2line positive distance measure
+	if ((bearingAngle >= 355) && (roadBearing <= 5))
+	{
+		GT_d2l = sin((360 - bearingAngle + roadBearing) * M_PI / 180) * abs(GT_d2l);
+	}
+	else {
+
+		GT_d2l = sin((bearingAngle - roadBearing) * M_PI / 180) * abs(GT_d2l);
+	}
+
+	GT_d2l = GT_d2l * (-1);
+
+	ptr_gtMetadata->f4_gt_distance = GT_d2l;
+
+	printf("\nD2L_corrected: %f m", GT_d2l);
 
 	return 0;
 }

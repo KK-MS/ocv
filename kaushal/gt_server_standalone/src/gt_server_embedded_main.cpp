@@ -18,11 +18,11 @@ using namespace cv;
 // Function Declation
 int process_frame(netrx* ptr_server_obj);
 
-int LandmarkOdometry(netrx* ptr_server_obj, int bearingAngle_rot, int roadBearing);
+int LandmarkOdometry(netrx* ptr_server_obj, int bearingAngle_rot);
 
-int bearing_angle90deg(netrx* ptr_server_obj);
+int bearing_angle90deg(int roadBearing);
 
-int cal_D2L_bearing(netrx* ptr_server_obj);
+int cal_D2L_bearing(netrx* ptr_server_obj, int roadBearing);
 
 int run_app(netrx *ptr_server_obj)
 {	
@@ -32,20 +32,21 @@ int run_app(netrx *ptr_server_obj)
 	GT_LANE_PACKET* ptr_gtMetadata = (GT_LANE_PACKET*) & (ptr_server_obj->stGtLanePacket);
 
 	int counter = 0;
-	int bearingAngle_rot;
+	int roadBearing_rot;
 	bool skip = true;
 	int i = 8955;       // save_prcoess_frame
 
 	int FrameCount = 0;
 	Mat frame;
 
-	FILE* file;        // file for Update the Relocalize Data
+	FILE* file;         // file for Update the Relocalize Data
 
 	printf("\nLoad the IMU_file...\n");
 	// Open the GT_METADA csv file for create the ROI for D2L processing in frame
 	ifstream  imu_data("A7_IMU_24.04.20.csv");
 	
 	int time;
+	int GPS_stauts;
 	int frame_imu1;
 	string row_imu;
 	
@@ -67,7 +68,7 @@ int run_app(netrx *ptr_server_obj)
 	glob("D:/A7_measurement_24.4.20/evening/img/*.png", fn, false); // 24/04/2020
 
 	// For Saving the process frames as video
-	const String name = "./A7_24.04.2020_2.avi";
+	const String name = "./A7_24.04.2020_ODO_D2L.avi";
 
 	ptr_server_obj->wrOutVideo.open(name, VideoWriter::fourcc('M', 'J', 'P', 'G'), 10.0, Size(640, 480), true);
 
@@ -81,7 +82,7 @@ int run_app(netrx *ptr_server_obj)
 	// open the file for saving the process frame data at the end of the loop
 	file = fopen("A7_IMU_24.04.20_Relocalize.csv", "a");
 
-	fprintf(file,"INS_time_ms, INS_Lat, INS_Lon, Nearest_Lat, Nearest_Lon, GT_D2L_m, Frame_no, ODO_D2L_m, Lat_new, Lon_new\n");
+	fprintf(file,"INS_time_ms, INS_Lat, INS_Lon, Nearest_Lat, Nearest_Lon, GT_D2L_m, Frame_no, ODO_D2L_m, Lat_new, Lon_new, GPS_stauts\n");
 
 	fclose(file);
 
@@ -109,6 +110,7 @@ int run_app(netrx *ptr_server_obj)
 		if (!frame_imu.empty()) {
 
 			time = stoi(time_imu);
+			GPS_stauts = stoi(gps_imu);
 			ptr_metadata->d8_ins_latitude  = stod(lat_imu);
 			ptr_metadata->d8_ins_longitude = stod(lon_imu);
 			ptr_metadata->u4_frame_number  = stoi(frame_imu);
@@ -138,7 +140,7 @@ int run_app(netrx *ptr_server_obj)
 			counter++;
 
 			// calculate the distance (GT_D2L) betwwen two points IMU_lat_lon & GT_lat_lon > bearing angle
-			cal_D2L_bearing(ptr_server_obj);
+			cal_D2L_bearing(ptr_server_obj, roadBearing);
 
 			// Load the frame to process
 			frame = imread(fn[FrameCount].c_str(), IMREAD_COLOR);
@@ -157,20 +159,20 @@ int run_app(netrx *ptr_server_obj)
 			process_frame(ptr_server_obj);
 
 			// Bearing angle rotarte to lateral Axis
-			bearingAngle_rot = bearing_angle90deg(ptr_server_obj);
+			roadBearing_rot = bearing_angle90deg(roadBearing);
 
 			//find the new car Posiotion Lat_new, Lon_new
-			LandmarkOdometry(ptr_server_obj, bearingAngle_rot, roadBearing);
+			LandmarkOdometry(ptr_server_obj, roadBearing_rot);
 
 			// open the file for saving the process frame data at the end of the loop
 			file = fopen("A7_IMU_24.04.20_Relocalize.csv", "a");
 
-			fprintf(file,"%d, %.8f, %.8f, %.8f, %.8f, %f, %d, %f, %.8f, %.8f\n"
+			fprintf(file,"%d, %.8f, %.8f, %.8f, %.8f, %f, %d, %f, %.8f, %.8f, %d\n"
 				, time, ptr_metadata->d8_ins_latitude, ptr_metadata->d8_ins_longitude
 				, ptr_gtMetadata->d8_ins_latitude, ptr_gtMetadata->d8_ins_longitude
 				, ptr_gtMetadata->f4_gt_distance, ptr_metadata->u4_frame_number
 				, ptr_metadata->f4_odo_distance, ptr_gtMetadata->d8_gt_latitude
-				, ptr_gtMetadata->d8_gt_longitude);
+				, ptr_gtMetadata->d8_gt_longitude, GPS_stauts);
 			
 			fclose(file);
 
