@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-#include "netrx1.h"
+#include "netrx.h"
 #include "packet.h"
 
 using namespace std;

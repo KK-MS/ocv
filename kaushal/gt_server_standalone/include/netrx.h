@@ -70,8 +70,11 @@ typedef struct netrx {
   int bind_sock_desc_gt;
   int bind_sock_desc_gt_bridge;
 
-  char *gt_filename;	// csv filename
-
+  char *cro_filename;	    // CRO_csv filename
+  char *imu_filename;	    // IMU_csv filename
+  char *img_folder_name;	// IMU_IMG_Folder name
+  char *odometry_filename;	// Odometry_csv filename
+  
   // Buffer handling variables
   char *ptr_req_buf;  // pointer to buffer where request is received
   char *ptr_send_buf; // Send buffer

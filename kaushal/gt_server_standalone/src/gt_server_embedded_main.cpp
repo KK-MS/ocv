@@ -9,8 +9,10 @@
 
 #include "opencv2/opencv.hpp"
 
-#include "netrx1.h"
+#include "netrx.h"
 #include "packet.h"
+
+#define RELOCALIZE_DATA_SAVE 1
 
 using namespace std;
 using namespace cv;
@@ -24,35 +26,40 @@ int bearing_angle90deg(int roadBearing);
 
 int cal_D2L_bearing(netrx* ptr_server_obj, int roadBearing);
 
-int run_app(netrx *ptr_server_obj)
-{	
+int run_app(netrx* ptr_server_obj)
+{
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
 
 	GT_LANE_PACKET* ptr_gtMetadata = (GT_LANE_PACKET*) & (ptr_server_obj->stGtLanePacket);
 
+	// Variable initialization from structure
+	char* CRO_filename     = ptr_server_obj->cro_filename;       // CRO_csv filename
+	char* IMU_filename     = ptr_server_obj->imu_filename;       // IMU_csv filename
+	char* IMG_folder_name  = ptr_server_obj->img_folder_name;    // IMU_IMG_Folder path
+	char* ODO_filename     = ptr_server_obj->odometry_filename;  // Odometry_csv filename
+	
 	int counter = 0;
 	int roadBearing_rot;
-	bool skip = true;
-	int i = 8955;       // save_prcoess_frame
+	int i = 8955;         // save_prcoess_frame
 
 	int FrameCount = 0;
 	Mat frame;
 
-	FILE* file;         // file for Update the Relocalize Data
+	FILE* file;        // file for Update the Relocalize Data
 
 	printf("\nLoad the IMU_file...\n");
 	// Open the GT_METADA csv file for create the ROI for D2L processing in frame
-	ifstream  imu_data("A7_IMU_24.04.20.csv");
-	
+	ifstream  imu_data(IMU_filename);
+
 	int time;
 	int GPS_stauts;
 	int frame_imu1;
 	string row_imu;
-	
+
 	printf("\nLoad the CRO_file...\n");
 	// Open the GT_METADA csv file for create the ROI for D2L processing in frame
-	ifstream  cro_data("A7_CRO_GT_24.04.20.csv");
+	ifstream  cro_data(CRO_filename);
 
 	int roadBearing;
 	string row_cro;
@@ -65,7 +72,7 @@ int run_app(netrx *ptr_server_obj)
 
 	// Load the image files from folder in sequence
 	vector<cv::String> fn;
-	glob("D:/A7_measurement_24.4.20/evening/img/*.png", fn, false); // 24/04/2020
+	glob(IMG_folder_name, fn, false); // 24/04/2020
 
 	// For Saving the process frames as video
 	const String name = "./A7_24.04.2020_ODO_D2L.avi";
@@ -79,12 +86,14 @@ int run_app(netrx *ptr_server_obj)
 	// Resize the logo
 	cv::resize(mlogo, ptr_server_obj->mat_logo, Size(90, 30));
 
-	// open the file for saving the process frame data at the end of the loop
-	file = fopen("A7_IMU_24.04.20_Relocalize.csv", "a");
+	// open the file and write the header line for saving the process frame data 
+	if (RELOCALIZE_DATA_SAVE == 1) {
 
-	fprintf(file,"INS_time_ms, INS_Lat, INS_Lon, Nearest_Lat, Nearest_Lon, GT_D2L_m, Frame_no, ODO_D2L_m, Lat_new, Lon_new, GPS_stauts\n");
+		file = fopen(ODO_filename, "a");
+  	    fprintf(file, "INS_time_ms, INS_Lat, INS_Lon, Nearest_Lat, Nearest_Lon, GT_D2L_m, Frame_no, ODO_D2L_m, Lat_new, Lon_new, GPS_stauts\n");
 
-	fclose(file);
+	    fclose(file); 
+    }
 
 	// read the GT_data line by line of IMU & CRO DATA to Calculate the D2L
 	while (getline(imu_data, row_imu)) {
@@ -164,17 +173,20 @@ int run_app(netrx *ptr_server_obj)
 			//find the new car Posiotion Lat_new, Lon_new
 			LandmarkOdometry(ptr_server_obj, roadBearing_rot);
 
-			// open the file for saving the process frame data at the end of the loop
-			file = fopen("A7_IMU_24.04.20_Relocalize.csv", "a");
+			if (RELOCALIZE_DATA_SAVE == 1) {
+				
+				// open the file for saving the process frame data at the end of the loop
+			    file = fopen(ODO_filename, "a");
 
-			fprintf(file,"%d, %.8f, %.8f, %.8f, %.8f, %f, %d, %f, %.8f, %.8f, %d\n"
-				, time, ptr_metadata->d8_ins_latitude, ptr_metadata->d8_ins_longitude
-				, ptr_gtMetadata->d8_ins_latitude, ptr_gtMetadata->d8_ins_longitude
-				, ptr_gtMetadata->f4_gt_distance, ptr_metadata->u4_frame_number
-				, ptr_metadata->f4_odo_distance, ptr_gtMetadata->d8_gt_latitude
-				, ptr_gtMetadata->d8_gt_longitude, GPS_stauts);
+				fprintf(file,"%d, %.8f, %.8f, %.8f, %.8f, %f, %d, %f, %.8f, %.8f, %d\n"
+					, time, ptr_metadata->d8_ins_latitude, ptr_metadata->d8_ins_longitude
+					, ptr_gtMetadata->d8_ins_latitude, ptr_gtMetadata->d8_ins_longitude
+					, ptr_gtMetadata->f4_gt_distance, ptr_metadata->u4_frame_number
+					, ptr_metadata->f4_odo_distance, ptr_gtMetadata->d8_gt_latitude
+					, ptr_gtMetadata->d8_gt_longitude, GPS_stauts);
 			
-			fclose(file);
+				fclose(file);
+            }
 
 			// save process_frame as image
 			imwrite(ss.str().c_str(), frame);
@@ -193,8 +205,21 @@ int run_app(netrx *ptr_server_obj)
 
 int main(int argc, char* argv[])
 {
+	int tot_arg = argc;
+	
+    if (tot_arg < 6) {
+      printf("***Error!! in arguments\n");
+      printf("Usage: <gt_server_standalone> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename>");
+      return -1;
+    }
 	// structure define
 	netrx serNet;
+
+	// Command line Arguments pass into structure
+	serNet.imu_filename      = argv[1];
+	serNet.cro_filename      = argv[2];
+	serNet.img_folder_name   = argv[3];
+	serNet.odometry_filename = argv[4];
 
 	// Load the IMU & CRO Data files & process the GT_D2L & ODO_D2L > Relocalization of car position 
 	run_app(&serNet);

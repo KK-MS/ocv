@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-#include "netrx1.h"
+#include "netrx.h"
 #include "packet.h"
 
 using namespace std;
@@ -66,7 +66,7 @@ int cal_D2L_bearing(netrx* ptr_server_obj, int roadBearing)
 
 	printf("\nBearing_angle: %d\n", bearingAngle);
 
-	// distance2line positive distance measure
+	// distance line positive distance measure
 	if ((bearingAngle >= 355) && (roadBearing <= 5))
 	{
 		GT_d2l = sin((360 - bearingAngle + roadBearing) * M_PI / 180) * abs(GT_d2l);
