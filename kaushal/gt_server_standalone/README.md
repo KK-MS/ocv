@@ -1,11 +1,11 @@
 # Ground server standalone with odometry functionalities
 
 
-Review comments:
-Review comments ZIM-236. Standalone GT server and odometry.
+### Review comments:
+ZIM-236. Standalone GT server and odometry.
 
-Code has hardcode value for ROI:
-gt_server_embedded_process_frame.cpp
+Code has hardcode value for ROI in gt_server_embedded_process_frame.cpp
+```javascript
 #if 1
 	// Manual ROI create
 	ROI_x1 = 420;
@@ -13,6 +13,7 @@ gt_server_embedded_process_frame.cpp
 	ROI_x2 = 210;
 	ROI_y2 = 100;
 #endif
+```
 1. Important that we have code without manual ROI and 
 2. Test the application with the manual ROI.
 --------------:
