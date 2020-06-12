@@ -25,6 +25,8 @@
 #ifndef NETRX_H
 #define NETRX_H
 
+#include <fstream>
+
 #include "packet.h"
 
 #include "opencv2/opencv.hpp"
@@ -72,8 +74,11 @@ typedef struct netrx {
 
   char *cro_filename;	    // CRO_csv filename
   char *imu_filename;	    // IMU_csv filename
-  char *img_folder_name;	// IMU_IMG_Folder name
-  char *odometry_filename;	// Odometry_csv filename
+  char *img_folder_name;    // IMU_IMG_Folder path
+  char *odometry_filename;  // Odometry_csv filename
+  
+  ifstream *imu_data;
+  ifstream cro_data;
   
   // Buffer handling variables
   char *ptr_req_buf;  // pointer to buffer where request is received

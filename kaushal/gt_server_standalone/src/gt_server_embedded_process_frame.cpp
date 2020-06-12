@@ -1,9 +1,5 @@
 #include <iostream>
 #include <stdio.h>
-#include <math.h>
-#include <fstream>
-#include <string>
-#include <vector>
 
 #include "opencv2/opencv.hpp"
 
@@ -13,14 +9,22 @@
 using namespace std;
 using namespace cv;
 
+// TODO: Get after the value from calibration of the setup.
+// It should also have tolerance range to compensate vibration.
 // 24/04/2020
-#define START_X      160      // 160
-#define START_Y      272      // 272 // 285
-#define END_Y        START_Y  // 380
-#define FRAME_WIDTH  640      // 1280 // 640
+#define START_X      160
+#define START_Y      272
+#define END_Y        START_Y
 
-#define PIXEL_DIST   2.1      // in to mm  by calibration // 2.28
+#define FRAME_WIDTH  640
+#define PIXEL_DIST   2.1    // in to mm  by calibration
 
+/*
+ ** process_frame
+ **
+ ** Process the IMU Frame > create the ROI based on GT_D2L
+ ** Calcualte the ODO_D2L & Dispaly the Process Frame
+ */
 int process_frame(netrx* ptr_server_obj)
 {
 	// Packet structure define
@@ -68,22 +72,15 @@ int process_frame(netrx* ptr_server_obj)
 	GT_point_lane_x = START_X + pix_lane;
 	GT_point_lane_y = START_Y;
 
-#if 0
 	// Auto ROI create based on GT_D2L
 	//create the points (x1, y1, x2, Y2) fro ROI
 	ROI_x1 = GT_point_lane_x - 25;
 	ROI_y1 = GT_point_lane_y - 25;
+	
+    // TODO: based on the image qualityand processing output.
+	// This can change if the processing output confident is not sufficient.
 	ROI_x2 = 50;
 	ROI_y2 = 50;
-#endif
-
-#if 1
-	// Manual ROI create
-	ROI_x1 = 420;
-	ROI_y1 = 240;
-	ROI_x2 = 210;
-	ROI_y2 = 100;
-#endif
 
 	cout << "GT_D2L: " << GTD2L << " mm," ;
 	printf(" Pix_ROI: %d", pix_lane);
@@ -99,14 +96,14 @@ int process_frame(netrx* ptr_server_obj)
 	cvtColor(ROI, HSV_Img, COLOR_BGR2HSV);
 
 	// white color thresholding_14.04.20
-	Scalar whiteMinScalar = Scalar(100, 100, 50); // 10 0 90 // 100 100 50 //
-	Scalar whiteMaxScalar = Scalar(255, 189, 255); // 50 189 255 // 250 189 255
+	Scalar whiteMinScalar = Scalar(100, 100, 50);
+	Scalar whiteMaxScalar = Scalar(255, 189, 255);
 
 	inRange(ROI, whiteMinScalar, whiteMaxScalar, LinesImg);
 
 	// Edge detection using canny detector
-	int minCannyThreshold = 190; // 190
-	int maxCannyThreshold = 230; // 230
+	int minCannyThreshold = 190;
+	int maxCannyThreshold = 230;
 	Canny(LinesImg, LinesImg, minCannyThreshold, maxCannyThreshold, 3, true);
 
 	// Morphological Operation
@@ -117,12 +114,12 @@ int process_frame(netrx* ptr_server_obj)
 	// now applying hough transform TO dETECT Lines in our image
 	vector<Vec4i> lines;
 
-	HoughLinesP(LinesImg, lines, 1, CV_PI / 180, 5, 0, 10); // process_2
+	HoughLinesP(LinesImg, lines, 1, CV_PI / 180, 5, 0, 10);
 
 	for (size_t i = 0; i < lines.size(); i++)
 	{
-		Vec4i l = lines[i];                     // we have 4 elements p1=x1,y1  p2= x2,y2
-		Scalar greenColor = Scalar(0, 255, 0);  // B=0 G=250 R=30
+		Vec4i l = lines[i];                   // we have 4 elements p1=x1,y1  p2= x2,y2
+		Scalar greenColor = Scalar(0, 255, 0);
 		line(ROI, Point(l[0], l[1]), Point(l[2], l[3]), greenColor, 1.5, 4);
 	}
 
@@ -150,7 +147,7 @@ int process_frame(netrx* ptr_server_obj)
 			
 			int result = cv::norm(cv::Mat(b), cv::Mat(a));
 			
-			float distance = result * PIXEL_DIST * 0.001; // 0.26 // 0.41 // Procoess_2
+			float distance = result * PIXEL_DIST * 0.001;
 
 			printf("\nx:%d, y:%d , val= %u \n", i, END_Y, pixel);
 			printf("We got the lane, found D2L= %f m\n", distance);
@@ -159,8 +156,7 @@ int process_frame(netrx* ptr_server_obj)
 
 			// Display the Frames
 			line(frame, Point(START_X, START_Y), Point(i, END_Y), Scalar(255, 255, 0), 1, 8);
-			//line(edges, Point(START_X, END_Y), Point(i, END_Y), Scalar(255, 255, 255), 1, 8);
-
+			
 			// Draw the rect of ROI_GT on process frame
 			rectangle(frame, Point(ROI_x1, ROI_y1), Point((ROI_x1 + ROI_x2), (ROI_y1 + ROI_y2)), Scalar(0, 255, 255), 1, LINE_8);
 			
@@ -174,7 +170,7 @@ int process_frame(netrx* ptr_server_obj)
 			ptr_server_obj->mat_logo.copyTo(frame(cv::Rect(540, 440, ptr_server_obj->mat_logo.cols, ptr_server_obj->mat_logo.rows)));
 			
 			// Write to video file
-			ptr_server_obj->wrOutVideo.write(frame);
+			//ptr_server_obj->wrOutVideo.write(frame);
 			
 			// Display the original frame or process frame
 			imshow("Process_frame_D2L", frame);
@@ -182,6 +178,6 @@ int process_frame(netrx* ptr_server_obj)
 			break;
 		}
 	}
-			
-  return 0;
+
+    return 0;
 }

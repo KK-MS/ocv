@@ -1,14 +1,18 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-#include <fstream>
-#include <string>
 
 #include "netrx.h"
 #include "packet.h"
 
 using namespace std;
 
+/*
+ ** cal_D2L_bearing
+ **
+ ** Calculate the distance (GT_D2L) & Vehical Bearing angle (perpenticular to side lane)
+ ** Using IMU_Lat_lon and GT nearest Lat_lon
+ */
 int cal_D2L_bearing(netrx* ptr_server_obj, int roadBearing)
 {
 	// Packet structure define

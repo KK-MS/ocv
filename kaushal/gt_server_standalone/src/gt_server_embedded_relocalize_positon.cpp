@@ -1,14 +1,18 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-#include <fstream>
-#include <string>
 
 #include "netrx.h"
 #include "packet.h"
 
 using namespace std;
 
+/*
+ ** bearing_angle90deg
+ **
+ ** Road bearing anle rotation by 90 degree to make parallel vehical bearing angle
+ **	to calculate the new Lat & Lon for car Re-localization
+ */
 int bearing_angle90deg(int roadBearing)
 {
 	if (roadBearing >= 90)
@@ -19,6 +23,12 @@ int bearing_angle90deg(int roadBearing)
 	return roadBearing;
 }
 
+/*
+ ** LandmarkOdometry
+ **
+ ** Calculate the New Lat_lon for car position using ODO_D2L
+ ** Re-localization of car
+ */
 int LandmarkOdometry(netrx* ptr_server_obj, int bearingAngle_rot)
 {
 	// Packet structure define
