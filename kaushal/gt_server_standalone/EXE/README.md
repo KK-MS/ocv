@@ -20,7 +20,7 @@ From the Command prompt
 ```console
 <gt_server_standalone> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename>
 
-gt_server_standalone.exe A7_IMU_24.04.20.csv A7_CRO_GT_24.04.20.csv D:/A7_measurement_24.4.20/evening/img/\*.png odometry.csv
+gt_server_standalone.exe A7_IMU_24.04.20.csv A7_CRO_GT_24.04.20.csv D:/A7_measurement_24.4.20/evening/img/\*.png data/odometry.csv
 ```
 
 ## Output

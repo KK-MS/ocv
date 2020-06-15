@@ -154,7 +154,7 @@ int run_app(netrx* ptr_server_obj)
 
 			// To create the filenames as imu_frame number for save the process frames
 			std::stringstream ss;
-			ss << "D:/A7_measurement_24.4.20/evening/img_process1/" << ptr_metadata->u4_frame_number << ".png";
+			ss << "data/img_process/" << ptr_metadata->u4_frame_number << ".png";
 			
 			// process the IMU_Frame fro ODO_D2L to relocalize the car position
 			process_frame(ptr_server_obj);
