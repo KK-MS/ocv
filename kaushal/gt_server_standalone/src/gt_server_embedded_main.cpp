@@ -25,12 +25,12 @@ int bearing_angle90deg(int roadBearing);
 int cal_D2L_bearing(netrx* ptr_server_obj, int roadBearing);
 
 /*
- ** run_app
+ ** run_side_lane_relocalize_app
  **
  ** Load the IMU & CRO Data files & process the GT_D2L & ODO_D2L 
- ** Relocalization of car position
+ ** Relocalization of car position using Side lane
  */
-int run_app(netrx* ptr_server_obj)
+int run_side_lane_relocalize_app(netrx* ptr_server_obj)
 {
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
@@ -154,8 +154,9 @@ int run_app(netrx* ptr_server_obj)
 
 			// To create the filenames as imu_frame number for save the process frames
 			std::stringstream ss;
-			ss << "data/img_process/" << ptr_metadata->u4_frame_number << ".png";
-			
+			//ss << "D:/A7_measurement_24.4.20/evening/img_process1/" << ptr_metadata->u4_frame_number << ".png";
+			ss << "Data/img_process/" << ptr_metadata->u4_frame_number << ".png";
+
 			// process the IMU_Frame fro ODO_D2L to relocalize the car position
 			process_frame(ptr_server_obj);
 
@@ -181,7 +182,7 @@ int run_app(netrx* ptr_server_obj)
 			}
 
 			// save process_frame as image
-			//imwrite(ss.str().c_str(), frame);
+			imwrite(ss.str().c_str(), frame);
 
 			waitKey(50);
 		}
@@ -195,11 +196,23 @@ int run_app(netrx* ptr_server_obj)
 }
 
 /*
+ ** run_traffic_sign_relocalize_app
+ **
+ ** relocalize the car position using traffic sign detection and D2TS
+ */
+int run_traffic_sign_relocalize_app(netrx* ptr_server_obj)
+{
+	printf("\nThe Relocalization using traffic sign is under progress...");
+
+	return 0;
+}
+
+/*
  ** Init
  **
  ** Data initialization
  */
-int Init(netrx *ptr_server_obj)
+int init(netrx *ptr_server_obj)
 {
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
@@ -227,12 +240,10 @@ int Init(netrx *ptr_server_obj)
 int main(int argc, char* argv[])
 {
 	int tot_arg = argc;
-
-	printf("\nargc: %d", argc);
-
-	if (tot_arg < 5) {
+		
+	if (tot_arg < 6) {
 		printf("***Error!! in arguments\n");
-		printf("Usage: <gt_server_standalone> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename>");
+		printf("Usage: <gt_server_standalone> <app_select: 0-> SL, 1 -> TS> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename>");
 		return -1;
 	}
 
@@ -240,16 +251,23 @@ int main(int argc, char* argv[])
 	netrx serNet;
 
 	// Command line Arguments pass into structure
-	serNet.imu_filename      = argv[1];
-	serNet.cro_filename      = argv[2];
-	serNet.img_folder_name   = argv[3];
-	serNet.odometry_filename = argv[4];
+	serNet.selection_SL_TS   = atoi(argv[1]);
+	serNet.imu_filename      = argv[2];
+	serNet.cro_filename      = argv[3];
+	serNet.img_folder_name   = argv[4];
+	serNet.odometry_filename = argv[5];
 
 	// Data initialization
-	Init(&serNet);
+	init(&serNet);
+	
+	switch (serNet.selection_SL_TS) {
 
-	// Load the IMU & CRO Data files & process the GT_D2L & ODO_D2L > Relocalization of car position 
-	run_app(&serNet);
-
+	case 1: run_side_lane_relocalize_app(&serNet);
+		    break;
+	
+	case 2: run_traffic_sign_relocalize_app(&serNet);
+		    break;
+	}
+	
 	return 0;
 }

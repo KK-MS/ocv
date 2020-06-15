@@ -71,6 +71,8 @@ typedef struct netrx {
   int bind_sock_desc;
   int bind_sock_desc_gt;
   int bind_sock_desc_gt_bridge;
+  
+  int selection_SL_TS;      // Select the relocalization by Side Lane or Traffic sign 
 
   char *cro_filename;	    // CRO_csv filename
   char *imu_filename;	    // IMU_csv filename
