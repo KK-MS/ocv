@@ -31,15 +31,28 @@
 
 #include "opencv2/opencv.hpp"
 
-#define ROW_NUM 20000
-
 #define R	 6378137.0               // Radius from the center of the earth to the equator
 #define EN	 0.0818191908426         // Eccentricity
 #define M_PI 3.14159265358979323846
 
+// Saving process data
+#define RELOCALIZE_DATA_SAVE       1
+#define PROCESS_FRAME_SAVE         0
+#define PROCESS_FRAMES_VIDEO_SAVE  0
+
+// Frame Status
+#define FRAME_STATUS_8  8
+#define FRAME_STATUS_4  4
+#define FRAME_STATUS_2  2
+#define FRAME_STATUS_1  1
+#define FRAME_STATUS_0  0
+
+#define TRAFFIC_INFO 0
+
 // Namespace
 using namespace std;
 using namespace cv;
+
 // STRUCTURES
 
 // NETRX: Application main structure
@@ -50,49 +63,31 @@ typedef struct netrx {
 
   // GT Lane packet
   GT_LANE_PACKET stGtLanePacket;
-  //GT_LANE_PACKET ptr_gtMetadata[ROW_NUM];
-
-  int sock_desc;
-  int sock_desc_gt;
-  int sock_desc_gt_bridge;
-
-  char *serverIP;
-  char *serverIP_nxp;
-  char *serverIP_gt_bridge;
-
-  int port;
-  int port_gt;
-  int port_gt_bridge;
-
-  int protocol;
-  int protocol_gt;
-  int protocol_gt_bridge;
-
-  int bind_sock_desc;
-  int bind_sock_desc_gt;
-  int bind_sock_desc_gt_bridge;
+ 
+  FILE *odometry_file;
   
-  int selection_SL_TS;      // Select the relocalization by Side Lane or Traffic sign 
-
   char *cro_filename;	    // CRO_csv filename
   char *imu_filename;	    // IMU_csv filename
   char *img_folder_name;    // IMU_IMG_Folder path
   char *odometry_filename;  // Odometry_csv filename
   
-  ifstream *imu_data;
-  ifstream cro_data;
-  
+  string road;
+  string direction;
+	  
   // Buffer handling variables
   char *ptr_req_buf;  // pointer to buffer where request is received
   char *ptr_send_buf; // Send buffer
   int size_send_buf;  // Size of data to be transmitted.\
   
-  // frame_Process
+  // Process_frame Variables
   Mat frame;
   Mat mat_logo;
   const char *frame_name;
   const char *frame_save_no;
-  // OUTPUT
+  
+  float odo_D2L_prev;
+  
+  // Process Frames save as Video
   VideoWriter wrOutVideo;
 
 } netrx;
