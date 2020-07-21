@@ -19,9 +19,9 @@ Visual studio Compilation
 ## Run
 From the Command prompt
 ```console
-<gt_server_standalone> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename>
+<gt_server_standalone> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename> <lat_gps_mo_FR> <lon_gps_mo_FR>
 
-gt_server_standalone.exe A7_IMU_7&8_24.04.20.csv A7_mapped_CRO_7&8_24.04.20.csv D:/A7_measurement_24.4.20/evening/img/\*.png odometry_7&8.csv
+gt_server_standalone.exe A7_IMU_7&8_24.04.20.csv A7_mapped_CRO_7&8_24.04.20.csv C:/Users/ll_stkapate/Desktop/Messungen_GeneSys/7&8/img/ odometry_7&8.csv -0.947 2.314
 ```
 
 ## Output

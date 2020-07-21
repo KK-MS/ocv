@@ -63,30 +63,31 @@ typedef struct netrx {
 
   // GT Lane packet
   GT_LANE_PACKET stGtLanePacket;
- 
-  FILE *odometry_file;
   
+  // File names for Input data
   char *cro_filename;	    // CRO_csv filename
   char *imu_filename;	    // IMU_csv filename
   char *img_folder_name;    // IMU_IMG_Folder path
   char *odometry_filename;  // Odometry_csv filename
+
+  // File name for Odometry Data save
+  FILE *odometry_file;
   
+  // variables for printing the road info on the Process Frame
   string road;
   string direction;
-	  
-  // Buffer handling variables
-  char *ptr_req_buf;  // pointer to buffer where request is received
-  char *ptr_send_buf; // Send buffer
-  int size_send_buf;  // Size of data to be transmitted.\
-  
+
+  // variables for GPS mounting Position (Offset) from FR wheel
+  float gps_lat_offset;
+  float gps_lon_offset;
+
   // Process_frame Variables
   Mat frame;
   Mat mat_logo;
+  
   const char *frame_name;
   const char *frame_save_no;
-  
-  float odo_D2L_prev;
-  
+    
   // Process Frames save as Video
   VideoWriter wrOutVideo;
 

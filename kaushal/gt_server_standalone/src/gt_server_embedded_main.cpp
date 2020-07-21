@@ -83,8 +83,8 @@ int run_car_relocalize_app(netrx* ptr_server_obj)
 	if (RELOCALIZE_DATA_SAVE == 1) {
 
 		ODO_file = fopen(ODO_filename, "a");
-  	    fprintf(ODO_file, "INS_time_ms,INS_Lat,INS_Lon,Nearest_Lat,Nearest_Lon,GT_D2L_m,Frame_no,ODO_D2L_m,Lat_new,Lon_new,GPS_stauts,Frame_status,Confidence,INS_lat_antenna,INS_lon_antenna,Validate\n");
-
+  	    fprintf(ODO_file, "INS_time_ms,INS_Lat,INS_Lon,Nearest_Lat,Nearest_Lon,GT_D2L_m,Frame_no,ODO_D2L_m,Lat_new,Lon_new,GPS_stauts,Frame_status,Confidence,INS_lat_antenna,INS_lon_antenna\n");
+		
 	    fclose(ODO_file);
     }
 
@@ -109,7 +109,8 @@ int run_car_relocalize_app(netrx* ptr_server_obj)
 		// get the CRO_Data Nearest GT coordinate mapped with given IMU_DATA
 		getline(cro_data, row_cro);
 		
-		if (!frame_imu.empty() && !time_imu.empty() && !lat_imu.empty() && !lon_imu.empty()) {
+		if ( !frame_imu.empty() && !time_imu.empty() && !lat_imu.empty() && !lon_imu.empty() && (stoi(frame_imu) >= 14000) && (stoi(frame_imu) <= 18000)) {
+		//if (!frame_imu.empty() && !time_imu.empty() && !lat_imu.empty() && !lon_imu.empty()) {
 			
 			stringstream  row_stream(row_cro);
 			string gps_imu_cro;
@@ -271,7 +272,7 @@ int init(netrx *ptr_server_obj)
 	if (PROCESS_FRAMES_VIDEO_SAVE == 1) {
 
 		// For Saving the process frames as video
-		const String name = "./A7_24.04.2020_7&8.avi";
+		const String name = "./A7_24.04.2020_7&8_14000_18000.avi";
 
 		ptr_server_obj->wrOutVideo.open(name, VideoWriter::fourcc('M', 'J', 'P', 'G'), 10.0, Size(640, 480), true);
 	}
@@ -295,9 +296,9 @@ int main(int argc, char* argv[])
 {
 	int tot_arg = argc;
 	
-	if (tot_arg < 5) {
+	if (tot_arg < 7) {
 		printf("***Error!! in arguments\n");
-		printf("Usage: <gt_server_standalone> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename>");
+		printf("Usage: <gt_server_standalone> <IMU_filename> <Mapped_CRO_filename> <IMU_Image_folder_path> <save_odometry_data_filename> <lat_gps_mo_FR> <lon_gps_mo_FR>");
 		return -1;
 	}
 
@@ -309,6 +310,9 @@ int main(int argc, char* argv[])
 	serNet.cro_filename      = argv[2];
 	serNet.img_folder_name   = argv[3];
 	serNet.odometry_filename = argv[4];
+	
+	serNet.gps_lat_offset = atof(argv[5]);
+	serNet.gps_lon_offset = atof(argv[6]);
 
 	// Data initialization
 	init(&serNet);

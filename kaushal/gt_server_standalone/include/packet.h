@@ -92,10 +92,9 @@ typedef struct packet {
 	double d8_out_odo_longitude;       //< Odometry calculated longitude
 	double d8_out_odo_latitude_prev;   //< Odometry calculated latitude
 	double d8_out_odo_longitude_prev;  //< Odometry calculated longitude
-    float  f4_out_odo_confidence;      //< Odometry calculated confidence
+	float  f4_out_odo_confidence;      //< Odometry calculated confidence
 	
 	// GPS Mounting Offset Correction Parameters
-	float  f4_mo_distance;                //< Diastance between 2 GPS points
 	float  f4_mo_bearingAngle;            //< Bearing angle to the road
 	double d8_mo_ins_latitude_antenna;   //< MOunting Offset calculated INS_latitude
 	double d8_mo_ins_longitude_antenna;  //< Mounting Offset calculated INS_longitude
