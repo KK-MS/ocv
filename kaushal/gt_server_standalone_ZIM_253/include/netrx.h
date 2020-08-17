@@ -35,11 +35,6 @@
 #define EN	 0.0818191908426         // Eccentricity
 #define M_PI 3.14159265358979323846
 
-// Saving process data
-#define RELOCALIZE_DATA_SAVE       1
-#define PROCESS_FRAME_SAVE         0
-#define PROCESS_FRAMES_VIDEO_SAVE  0
-
 // Frame Status
 #define FRAME_STATUS_8  8
 #define FRAME_STATUS_4  4
@@ -64,15 +59,31 @@ typedef struct netrx {
   // GT Lane packet
   GT_LANE_PACKET stGtLanePacket;
   
-  // ADMA packet
-  ADMA_PACKET stAdmaPacket;
-  
   // File names for Input data
   string cro_filename;	    // CRO_csv filename
   string imu_filename;	    // IMU_csv filename
   string img_folder_name;   // IMU_IMG_Folder path
   string odometry_filename; // Odometry_csv filename
+
+  // Input Data for csv file reading
+  string GPS_Time;
+  string INS_Lat;
+  string INS_Lon;
+  string frame_number;
+  string GPS_status;
+  string Road;
+  string Direction;
+  string GT_lat;
+  string GT_lon;
+  string GT_road_bearing;
+
+  // Process / Visual Odometry data saving options > Get the info from config.json file
+  int VO_data_save_csv;
+  int VO_process_frame_save;
+  int VO_process_frames_video_save;
   
+  int traffic_info;
+ 
   char ODO_filename[50];
   
   // File name for Odometry Data save

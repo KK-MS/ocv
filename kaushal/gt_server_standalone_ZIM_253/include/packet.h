@@ -77,7 +77,6 @@ typedef struct packet {
 	unsigned int  u4_frame_height;     //< Raw image height
 	unsigned int  u4_frame_resolution; //< Image resolution
 	unsigned int  u4_frame_type;       //< JPEG, etc.
-	//unsigned int  u4_frame_reserved2;  //< Reserved
 	unsigned int  u4_ins_gps_status;   //< Reserved
 	
 	// TBD Atlatec other info
@@ -97,70 +96,11 @@ typedef struct packet {
 	float  f4_out_odo_confidence;      //< Odometry calculated confidence
 	
 	// GPS Mounting Offset Correction Parameters
-	float  f4_mo_bearingAngle;            //< Bearing angle to the road
+	float  f4_mo_bearingAngle;           //< Bearing angle to the road
 	double d8_mo_ins_latitude_antenna;   //< MOunting Offset calculated INS_latitude
 	double d8_mo_ins_longitude_antenna;  //< Mounting Offset calculated INS_longitude
 	
 } PACKET;
-
-typedef struct ADMA_packet {
-	
-	unsigned int frame_number;
-	
-	unsigned int State0;
-	unsigned int State1;
-	unsigned int State2;
-	unsigned int State3;
-	
-	unsigned int Error0;
-	unsigned int Error1;
-	unsigned int Error2;
-	unsigned int Error3;
-	
-	float        Rate_Body_X;
-	float        Rate_Body_Y;
-	float        Rate_Body_Z;
-	
-	float        Acc_Body_X;
-	float        Acc_Body_Y;
-	float        Acc_Body_Z;
-	
-	double       GPS_Lat_Abs;
-	double       GPS_Lon_Abs;
-	
-	float        GPS_Stddev_Lat;
-	float        GPS_Stddev_Lon;
-	float        GPS_Stddev_Height;
-	
-	float        GPS_Vel_Frame_X;
-	float        GPS_Vel_Frame_Y;
-	float        GPS_Vel_Frame_Z;
-	
-	float        GPS_Vel_Latency;
-	float        GPS_Stddev_Vel_X;
-	float        GPS_Stddev_Vel_Y;	
-	float        GPS_Stddev_Vel_Z;
-	
-	unsigned int GPS_Time_msec;
-	unsigned int GPS_Time_Week;
-	unsigned int GPS_Sats_Visible;
-	unsigned int GPS_COG;
-	
-	float        GPS_Height;
-	
-	unsigned int INS_Time_msec;
-	unsigned int Status_GPS_Mode;
-	
-	double       INS_Lat_Abs;
-	double       INS_Lon_Abs;
-
-	float        GT_D2L;
-	double       GT_Lat;
-	double       GT_Lon;
-	float        GT_bear;
-	double       GT_ele;
-
-}ADMA_PACKET;
 
 // GT LANE Response packet
 typedef struct gt_lane_packet{
@@ -175,6 +115,7 @@ typedef struct gt_lane_packet{
 	double        d8_gt_latitude;    //< GT latitude
 	double        d8_gt_longitude;   //< GT longitude
 	float         f4_gt_distance;    //< Distance between INX and GT coordinates
+	float         f4_gt_raodbearing; //< GT_road_bearing
 
 } GT_LANE_PACKET;
 

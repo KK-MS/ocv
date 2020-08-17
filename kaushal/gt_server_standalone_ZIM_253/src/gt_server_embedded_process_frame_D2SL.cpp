@@ -9,15 +9,6 @@
 using namespace std;
 using namespace cv;
 
-// TODO: Get after the value from calibration of the setup.
-// It should also have tolerance range to compensate vibration.
-#define START_X      160
-#define START_Y      272
-#define END_Y        START_Y
-
-#define FRAME_WIDTH  640
-#define PIXEL_DIST   2.1    // in to mm  by calibration
-
 /*
  ** process_frame
  **
@@ -42,7 +33,7 @@ int process_frame(netrx* ptr_server_obj)
 	int ROI_x2;
 	int ROI_y2;
 	int gps_status;
-
+	
 	// Variables for getting the Pixel value
 	Scalar pixelValue;
 	uchar pixel;
@@ -68,14 +59,14 @@ int process_frame(netrx* ptr_server_obj)
 	GTD2L = GT_D2L * 1000;
 
 	// Convert the D2L in to pixels
-	pix_lane = GTD2L / PIXEL_DIST;
+	pix_lane = GTD2L / ptr_server_obj->pixel_dist;
 
 	// GT point on Lnae (x,y)
-	GT_point_lane_x = START_X + pix_lane;
-	GT_point_lane_y = START_Y;
+	GT_point_lane_x = ptr_server_obj->start_X + pix_lane;
+	GT_point_lane_y = ptr_server_obj->start_Y;
 
 	// Select the ROI on Main Frame based on GPS_Status & Calibration Distance (Tyre to lane Maximum Distance in frame) 
-	if (GT_D2L > 0 && GT_D2L < 0.9) {
+	if (GT_D2L > 0 && GT_D2L < ptr_server_obj->cali_max_D2L) {
 
 		if (gps_status == 8) {
 
@@ -186,9 +177,9 @@ int process_frame(netrx* ptr_server_obj)
 	Canny(frame, LinesImg, 250, 255, 3, true);
 	
 	// process ODO_D2L
-	for (int i = START_X; i < FRAME_WIDTH; i++)
+	for (int i = ptr_server_obj->start_X; i < ptr_server_obj->frame_width; i++)
 	{
-		pixel = (uchar)LinesImg.at<uchar>(Point(i, END_Y));
+		pixel = (uchar)LinesImg.at<uchar>(Point(i, ptr_server_obj->end_Y));
 
 		if (pixel >= iLaneColorUpperThreshold) {
 			iLanePixelCount++;
@@ -200,20 +191,20 @@ int process_frame(netrx* ptr_server_obj)
 		if (pixel >= iLaneColorUpperThreshold) {
 			
 			// Find the D2L
-			Point2f a(START_X, START_Y);
-			Point2f b(i, END_Y);
+			Point2f a(ptr_server_obj->start_X, ptr_server_obj->start_Y);
+			Point2f b(i, ptr_server_obj->end_Y);
 			
 			int result = cv::norm(cv::Mat(b), cv::Mat(a));
 			
-			float distance = result * PIXEL_DIST * 0.001;
+			float distance = result * ptr_server_obj->pixel_dist * 0.001;
 
-			printf("\nx:%d, y:%d , val= %u", i, END_Y, pixel);
+			printf("\nx:%d, y:%d , val= %u", i, ptr_server_obj->end_Y, pixel);
 			printf("\nWe got the lane, found D2L= %f m\n", distance);
 
 			ptr_metadata->f4_odo_distance = distance;
 
 			// Display the Frames
-			line(frame, Point(START_X, START_Y), Point(i, END_Y), Scalar(255, 255, 0), 1, 8);
+			line(frame, Point(ptr_server_obj->start_X, ptr_server_obj->start_Y), Point(i, ptr_server_obj->end_Y), Scalar(255, 255, 0), 1, 8);
 			
 			// Draw the rect of ROI_GT on process frame
 			rectangle(frame, Point(ROI_x1, ROI_y1), Point((ROI_x1 + ROI_x2), (ROI_y1 + ROI_y2)), Scalar(0, 255, 255), 1, LINE_8);
@@ -234,7 +225,7 @@ int process_frame(netrx* ptr_server_obj)
 			// Put the LOGO on real frame
 			ptr_server_obj->mat_logo.copyTo(frame(cv::Rect(540, 440, ptr_server_obj->mat_logo.cols, ptr_server_obj->mat_logo.rows)));
 
-			if (PROCESS_FRAMES_VIDEO_SAVE == 1) {
+			if (ptr_server_obj->VO_process_frames_video_save == 1) {
 
 				// Write to video file
 				ptr_server_obj->wrOutVideo.write(frame);

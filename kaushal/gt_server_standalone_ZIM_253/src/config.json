@@ -4,5 +4,29 @@
 	"Image_Folder_path" : "C:/Users/ll_stkapate/Desktop/Messungen_GeneSys/7&8/img/",
 	"Output_odometry"   : "7&8/odometry/odometry_7&8.csv",
 	"Lat_offset"        : "-0.947",
-	"Lon_offset"        : "2.314"
+	"Lon_offset"        : "2.314",	
+	
+	"GPS_Time"          : "GPS_Time_msec",
+	"INS_Lat"           : "INS_Lat_Abs",
+	"INS_Lon"           : "INS_Long_Abs",
+	"frame_number"      : "FrameNumber",
+	"GPS_status"        : "Status_GPS_Mode",
+	"Road"              : "road",
+	"Direction"         : "direction",
+	
+	"GT_lat"            : "GT_lat",
+	"GT_lon"            : "GT_lon",
+	"GT_road_bearing"   : "GT_bear",
+	
+	"Cali_START_X"      : "160",
+	"Cali_START_Y"      : "272",
+	"Cali_END_Y"        : "272",
+	"Frame_width"       : "640",
+	"Pixel_distance"    : "2.1",
+	"Cali_max_D2L"      : "0.9",
+	
+	"VO_Data_Save"              : "1",
+	"Process_Frame_Save"        : "0",
+	"Process_Frames_video_SAVE" : "0",
+	"Traffic_info"              : "0"	
 }

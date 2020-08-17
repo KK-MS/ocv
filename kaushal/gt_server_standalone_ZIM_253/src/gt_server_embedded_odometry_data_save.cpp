@@ -37,7 +37,7 @@ int odometry_data_save(netrx *ptr_server_obj)
 
 #if ALL_DATA_SAVE
 
-	if ((ODO_D2L < 0.9)) {
+	if ((ODO_D2L < ptr_server_obj->cali_max_D2L)) {
 		
 		// print the data in odometry.csv for analysis or future use
 		fprintf(ODO_file, "%d,%.8f,%.8f,%.8f,%.8f,%f,%d,%f,%.8f,%.8f,%d,%d,%f,%.8f,%.8f\n"
@@ -49,7 +49,7 @@ int odometry_data_save(netrx *ptr_server_obj)
 			, FRAME_STATUS_8, confidence, ptr_metadata->d8_mo_ins_latitude_antenna
 			, ptr_metadata->d8_mo_ins_longitude_antenna);
 	}
-	else if ((ODO_D2L > 0.9) || (ODO_D2L <= 0)) {
+	else if ((ODO_D2L > ptr_server_obj->cali_max_D2L) || (ODO_D2L <= 0)) {
 
 		// print the data in odometry.csv for analysis or future use
 		fprintf(ODO_file, "%d,%.8f,%.8f,%.8f,%.8f,%f,%d,%f,%.8f,%.8f,%d,%d,%f,%.8f,%.8f\n"
@@ -66,7 +66,7 @@ int odometry_data_save(netrx *ptr_server_obj)
 
 #if FRAME_STATUS
 
-	if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < 0.9) && ((confidence < 0.15) || (confidence < -0.15))) {
+	if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < ptr_server_obj->cali_max_D2L) && ((confidence < 0.15) || (confidence < -0.15))) {
 		
 		// print the data in odometry.csv for analysis or future use
 		fprintf(ODO_file, "%d,%.8f,%.8f,%.8f,%.8f,%f,%d,%f,%.8f,%.8f,%d,%d,%f\n"
@@ -77,7 +77,7 @@ int odometry_data_save(netrx *ptr_server_obj)
 			, ptr_metadata->d8_out_odo_longitude, ptr_metadata->u4_ins_gps_status
 			, FRAME_STATUS_8, confidence);
 	}
-	else if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < 0.9) && ((confidence < 0.30) || (confidence < -0.30))) {
+	else if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < ptr_server_obj->cali_max_D2L) && ((confidence < 0.30) || (confidence < -0.30))) {
 		
 		// print the data in odometry.csv for analysis or future use
 		fprintf(ODO_file, "%d,%.8f,%.8f,%.8f,%.8f,%f,%d,%f,%.8f,%.8f,%d,%d,%f\n"
@@ -88,7 +88,7 @@ int odometry_data_save(netrx *ptr_server_obj)
 			, ptr_metadata->d8_out_odo_longitude, ptr_metadata->u4_ins_gps_status
 			, FRAME_STATUS_4, confidence);
 	}
-	else if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < 0.9) && ((confidence < 0.5) || (confidence < -0.5))) {
+	else if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < ptr_server_obj->cali_max_D2L) && ((confidence < 0.5) || (confidence < -0.5))) {
 		
 		// print the data in odometry.csv for analysis or future use
 		fprintf(ODO_file, "%d,%.8f,%.8f,%.8f,%.8f,%f,%d,%f,%.8f,%.8f,%d,%d,%f\n"
@@ -99,7 +99,7 @@ int odometry_data_save(netrx *ptr_server_obj)
 			, ptr_metadata->d8_out_odo_longitude, ptr_metadata->u4_ins_gps_status
 			, FRAME_STATUS_2, confidence);
 	}
-	else if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < 0.9) && ((confidence < 0.9) || (confidence < -0.9))) {
+	else if ((ptr_metadata->u4_ins_gps_status == 8) && (ODO_D2L < ptr_server_obj->cali_max_D2L) && ((confidence < ptr_server_obj->cali_max_D2L) || (confidence < -ptr_server_obj->cali_max_D2L))) {
 
 		// print the data in odometry.csv for analysis or future use
 		fprintf(ODO_file, "%d,%.8f,%.8f,%.8f,%.8f,%f,%d,%f,%.8f,%.8f,%d,%d,%f\n"
@@ -110,7 +110,7 @@ int odometry_data_save(netrx *ptr_server_obj)
 			, ptr_metadata->d8_out_odo_longitude, ptr_metadata->u4_ins_gps_status
 			, FRAME_STATUS_1, confidence);
 	}
-	else if ((GT_D2L > 0.9) || (ODO_D2L > 0.9)) {
+	else if ((GT_D2L > 0.9) || (ODO_D2L > ptr_server_obj->cali_max_D2L)) {
 
 		// print the data in odometry.csv for analysis future use
 		fprintf(ODO_file, "%d,%.8f,%.8f,%.8f,%.8f,%f,%d,%f,%.8f,%.8f,%d,%d,%f\n"

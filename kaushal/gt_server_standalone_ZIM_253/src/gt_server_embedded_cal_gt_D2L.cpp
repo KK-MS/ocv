@@ -13,20 +13,21 @@ using namespace std;
  ** Calculate the distance (GT_D2L) & Vehical Bearing angle (perpenticular to side lane)
  ** Using IMU_Lat_lon and GT nearest Lat_lon
  */
-int cal_D2L_bearing(netrx* ptr_server_obj, float roadBearing)
+int cal_D2L_bearing(netrx* ptr_server_obj)
 {
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
 
 	GT_LANE_PACKET* ptr_gtMetadata = (GT_LANE_PACKET*) & (ptr_server_obj->stGtLanePacket);
 
-	double lat0 = ptr_gtMetadata->d8_gt_latitude;   // CRO_lat_nearest
-	double lon0 = ptr_gtMetadata->d8_gt_longitude;  // CRO_lon_nearest
-	double lat1 = ptr_metadata->d8_ins_latitude;    // IMU_lat
-	double lon1 = ptr_metadata->d8_ins_longitude;   // IMU_lon
+	double lat0 = ptr_gtMetadata->d8_gt_latitude;          // CRO_lat_nearest
+	double lon0 = ptr_gtMetadata->d8_gt_longitude;         // CRO_lon_nearest
+	double lat1 = ptr_metadata->d8_ins_latitude;           // IMU_lat
+	double lon1 = ptr_metadata->d8_ins_longitude;          // IMU_lon
+	float roadBearing = ptr_gtMetadata->f4_gt_raodbearing; // GT_road_bearing
 
 	float bearingAngle;
-
+	
 	// Radius north
 	double rn = (R * (1 - EN * EN)) / pow((1 - EN * EN * sin(lat0) * sin(lat0)), 1.5);
 
