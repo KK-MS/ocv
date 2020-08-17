@@ -1,0 +1,8 @@
+{ 
+    "IMU_File"          : "7&8/A7_IMU_7&8_24.04.20.csv",
+	"Mapped_CRO_File"   : "7&8/A7_mapped_CRO_7&8_24.04.20.csv",
+	"Image_Folder_path" : "C:/Users/ll_stkapate/Desktop/Messungen_GeneSys/7&8/img/",
+	"Output_odometry"   : "7&8/odometry/odometry_7&8.csv",
+	"Lat_offset"        : "-0.947",
+	"Lon_offset"        : "2.314"
+}
