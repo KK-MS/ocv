@@ -13,7 +13,7 @@ using namespace std;
  ** Calculate the distance (GT_D2L) & Vehical Bearing angle (perpenticular to side lane)
  ** Using IMU_Lat_lon and GT nearest Lat_lon
  */
-int cal_D2L_bearing(netrx* ptr_server_obj)
+int cal_D2SL_bearing(netrx* ptr_server_obj)
 {
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);

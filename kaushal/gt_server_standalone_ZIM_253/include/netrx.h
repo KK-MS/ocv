@@ -42,8 +42,6 @@
 #define FRAME_STATUS_1  1
 #define FRAME_STATUS_0  0
 
-#define TRAFFIC_INFO 0
-
 // Namespace
 using namespace std;
 using namespace cv;
@@ -81,13 +79,37 @@ typedef struct netrx {
   int VO_data_save_csv;
   int VO_process_frame_save;
   int VO_process_frames_video_save;
-  
   int traffic_info;
- 
-  char ODO_filename[50];
   
+  int start_X;
+  int start_Y;
+  int end_Y;  
+  int frame_width;
+  float pixel_dist;
+  float cali_max_D2L;
+  
+  char ODO_filename[50];
+    
   // File name for Odometry Data save
   FILE *odometry_file;
+  
+  // FILE for load the IMU and CRO files
+  FILE* imu_file;
+  FILE* cro_file;
+  
+  // variable to assign the coloumn number according to the needed header information
+  int time_col = 0;
+  int lat_col = 0;
+  int lon_col = 0;
+  int frame_no_col = 0;
+  int GPS_col = 0;
+  int road_col = 0;
+  int direction_col = 0;
+  
+  // variable to assign the coloumn number according to the needed header information
+  int GT_lat_col = 0;
+  int GT_lon_col = 0;
+  int GT_bear_col = 0;
   
   // variables for printing the road info on the Process Frame
   char road[15];

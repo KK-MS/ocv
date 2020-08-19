@@ -15,7 +15,7 @@ using namespace cv;
  ** Process the IMU Frame > create the ROI based on GT_D2L
  ** Calcualte the ODO_D2L & Dispaly the Process Frame
  */
-int process_frame(netrx* ptr_server_obj)
+int process_frame_D2SL(netrx* ptr_server_obj)
 {
 	// Packet structure define
 	PACKET* ptr_metadata = (PACKET*) & (ptr_server_obj->stPacket);
