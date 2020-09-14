@@ -235,18 +235,22 @@ int deInit(app_struct* ptr_struct_obj)
 	return 0;
 }
 
-int read_parse__json_stings(app_struct* ptr_struct_obj)
+int parse_config(app_struct* ptr_struct_obj)
 {
 	// Load the config.json file for parsing the information
-	ifstream jfile("./config.txt");
+	ifstream configFile("./config.txt");
 
-	json j = json::parse(jfile);
+    // TODO if config file is not found, set the values to default
+	// Handle config file not found error
+
+	json j = json::parse(configFile);
 
 	// Parse the json strings to the Structure variables
 
 	// Assign the filenames of needed Input .csv files (IMU & CRO), IMU Image folder path and
 	// Output file (.csv) info to the structure variables
 
+    // TODO keep the KEY string same as variable name without data type
 	ptr_struct_obj->imu_filename      = j["IMU_File"].get_ref<const string&>();
 
 	ptr_struct_obj->cro_filename      = j["Mapped_CRO_File"].get_ref<const string&>();
@@ -259,6 +263,7 @@ int read_parse__json_stings(app_struct* ptr_struct_obj)
 
 	// Assign the Actual GPS Mounting position offset with referece to FR Wheel info to the structure variables
 
+    // TODO check for stof error
 	ptr_struct_obj->gps_lat_offset = stof(j["Lat_offset"].get_ref<const string&>());
 	
 	ptr_struct_obj->gps_lon_offset = stof(j["Lon_offset"].get_ref<const string&>());
@@ -301,6 +306,7 @@ int read_parse__json_stings(app_struct* ptr_struct_obj)
 
 	// Assign the Camera Calibration P-arameters to the structure variables
 
+    // TODO check for stoi error
 	ptr_struct_obj->start_X      = stoi(j["Cali_START_X"].get_ref<const string&>());
 
 	ptr_struct_obj->start_Y      = stoi(j["Cali_START_Y"].get_ref<const string&>());
@@ -342,10 +348,12 @@ int main(int argc, char* argv[])
 	// structure define
 	app_struct app_packet;
 	
-	// read and parse the json string to the code as user input
-	read_parse__json_stings(&app_packet);
+	// TODO init the app structure, else it will have garbage values.
 
-	if ((app_packet.relocalization_app == 1)) {
+	// read and parse the json string to the code as user input
+	parse_config(&app_packet);
+
+	if ((app_packet.relocalisation_app == 1)) {
 
 		// Data initialization
 		init(&app_packet);

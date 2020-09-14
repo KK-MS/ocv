@@ -262,8 +262,8 @@ int run_car_relocalize_app(app_struct* ptr_struct_obj)
 		string GT_width_TS_cro  = getfield(row_cpy_7, ptr_struct_obj->GT_width_TS_col);
 		string GT_height_TS_cro = getfield(row_cpy_8, ptr_struct_obj->GT_height_TS_col);
 		string GT_shape_TS      = getfield(row_cpy_9, ptr_struct_obj->GT_shape_TS_col);
-		
-		if (!frame_SL_imu.empty() && stoi(frame_SL_imu) != 0 && !GPS_Time_msec_imu.empty() && !INS_Lat_Abs_imu.empty() && !INS_Lon_Abs_imu.empty() && GT_lat_cro != "None" && GT_lon_cro != "None")
+
+		if ((!frame_SL_imu.empty()) && (stoi(frame_SL_imu) != 0) && (!GPS_Time_msec_imu.empty()) && (!INS_Lat_Abs_imu.empty()) && (!INS_Lon_Abs_imu.empty()) && (GT_lat_cro != "None") && (GT_lon_cro != "None"))
 		{
 
 			// Convert the string to perticualr data foramt and assing it to stucture variable
@@ -350,7 +350,7 @@ int run_car_relocalize_app(app_struct* ptr_struct_obj)
 			waitKey(0);
 		}
 		else continue;
-		
+
 	} // loop_IMU_data_read
 	
 	return 0;
