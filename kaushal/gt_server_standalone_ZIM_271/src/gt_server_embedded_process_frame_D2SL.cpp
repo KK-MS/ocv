@@ -14,6 +14,10 @@ using namespace cv;
  **
  ** Process the IMU Frame > create the ROI based on GT_D2L
  ** Calcualte the ODO_D2L & Dispaly the Process Frame
+ ** variable use frame_SL, IMU_gps_status, GT_D2L for creating the ROI to find thr ODO_D2L
+ ** Calculated ODO_D2L pass to the structure to use it for relocalization of car posiotion
+ **
+ ** Also able to claculate directly from the measurement video to process the ODO_D2L
  */
 int process_frame_D2SL(app_struct* ptr_struct_obj)
 {
@@ -49,7 +53,7 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 	// load the frame to be process(d2l)
 	frame = ptr_struct_obj->frame_SL;
 	
-	if ((ptr_struct_obj->relocalization_app == 1)) {
+	if ((ptr_struct_obj->relocalisation_app == RUN_RELOCALISATION_APP)) {
 
 		// Load the calculated GT_D2L to create the ROI to calculate the Odo_D2L
 		GT_D2L = ptr_gtMetadata->f4_gt_distance;
@@ -67,10 +71,10 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 		GT_point_lane_x = ptr_struct_obj->start_X + pix_lane;
 		GT_point_lane_y = ptr_struct_obj->start_Y;
 
-		// Select the ROI on Main Frame based on GPS_Status & Calibration Distance (Tyre to lane Maximum Distance in frame) 
+		// Select the ROI on Main Frame based on GPS_Status & Calibration Distance (Tyre to lane Maximum Distance in frame)
 		if (GT_D2L > 0 && GT_D2L < ptr_struct_obj->cali_max_D2L) {
 
-			if (gps_status == 8) {
+			if (gps_status == GPS_STATUS_8) {
 
 				// Auto ROI create based on GT_D2L
 				//create the points (x1, y1, x2, Y2) fro ROI
@@ -82,7 +86,7 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 				ROI_x2 = 50;
 				ROI_y2 = 50;
 			}
-			else if (gps_status == 4) {
+			else if (gps_status == GPS_STATUS_4) {
 
 				// Auto ROI create based on GT_D2L
 				//create the points (x1, y1, x2, Y2) fro ROI
@@ -94,7 +98,7 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 				ROI_x2 = 70;
 				ROI_y2 = 70;
 			}
-			else if (gps_status == 2) {
+			else if (gps_status == GPS_STATUS_2) {
 
 				// Auto ROI create based on GT_D2L
 				//create the points (x1, y1, x2, Y2) fro ROI
@@ -106,7 +110,7 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 				ROI_x2 = 90;
 				ROI_y2 = 90;
 			}
-			else if (gps_status == 1 && (GT_D2L < 0.86)) {
+			else if (gps_status == GPS_STATUS_1 && (GT_D2L < 0.86)) {
 
 				// Auto ROI create based on GT_D2L
 				//create the points (x1, y1, x2, Y2) fro ROI
@@ -125,7 +129,6 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 				ROI_x2 = 80;
 				ROI_y2 = 100;
 			}
-
 		}
 		else {
 			// Manual ROI create
@@ -137,9 +140,11 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 
 		cout << "GT_D2L: " << GTD2L << " mm,";
 		printf(" Pix_ROI: %d", pix_lane);
+
+		printf("\nROI: X1 = %d, Y1 = %d, x2 = %d,Y2 = %d", ROI_x1, ROI_y1, ROI_x2, ROI_y2);
 	}
 
-	if ((ptr_struct_obj->process_video_D2SL == 1)) {
+	if ((ptr_struct_obj->process_video_D2SL == RUN_VIDEO_PROCESS_D2SL_APP)) {
 
 		// Resize the frame
 		cv::resize(frame, frame, Size(1280, 720));
@@ -147,26 +152,25 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 		imshow("input_frame", frame);
 
 		// create the points (x1, y1, x2, Y2) fro ROI
-		ROI_x1 = 527;
-		ROI_y1 = 570;
-		ROI_x2 = 753;
-		ROI_y2 = 50;
-	}	
-	
-	printf("\nROI: X1 = %d, Y1 = %d, x2 = %d,Y2 = %d", ROI_x1, ROI_y1, ROI_x2, ROI_y2);
+		ROI_x1 = ptr_struct_obj->roi_x1;
+		ROI_y1 = ptr_struct_obj->roi_y1;
+		ROI_x2 = ptr_struct_obj->roi_x2;
+		ROI_y2 = ptr_struct_obj->roi_y2;
+
+		printf("\nROI: X1 = %d, Y1 = %d, x2 = %d,Y2 = %d", ROI_x1, ROI_y1, ROI_x2, ROI_y2);
+	}
 
 	// Here we define our region of interest
 	Rect const box(ROI_x1, ROI_y1, ROI_x2, ROI_y2);
 	
 	Mat ROI = frame(box);
 	
-	if ((ptr_struct_obj->process_video_D2SL == 1)) {
+	if ((ptr_struct_obj->process_video_D2SL == RUN_VIDEO_PROCESS_D2SL_APP)) {
 
 		GaussianBlur(ROI, ROI, Size(13, 13), 0);
 	}
 
 	// convert our fame to HSV Space
-	//cvtColor(ROI, HSV_Img, COLOR_BGR2HSV);
 	cvtColor(ROI, HLS_Img, COLOR_BGR2HLS);
 
 	// white color thresholding
@@ -229,44 +233,66 @@ int process_frame_D2SL(app_struct* ptr_struct_obj)
 			// Draw the rect of ROI_GT on process frame
 			rectangle(frame, Point(ROI_x1, ROI_y1), Point((ROI_x1 + ROI_x2), (ROI_y1 + ROI_y2)), Scalar(0, 255, 255), 1, LINE_8);
 			
-			if ((ptr_struct_obj->relocalization_app == 1)) {
+			if ((ptr_struct_obj->relocalisation_app == RUN_RELOCALISATION_APP)) {
 
-				// put the text Frame number on real frame for information
-				putText(frame, format(" Frame: %d", ptr_metadata->u4_frame_number), Point(0, 450), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
+				// put the text Frame number on frame for information
+				putText(frame, format(" Frame: %d", ptr_metadata->u4_frame_number), Point(0, 430), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
 			
 				// put the text D2L on Real frame for information
-				putText(frame, format(" D2L: %f m", distance), Point(0, 420), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
+				putText(frame, format(" D2L: %f m", distance), Point(0, 460), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
 			
-				// put the Frame GPS Status on Real frame for information
+				// put the Frame GPS Status on frame for information
 				putText(frame, format(" INS_GPS: %d", gps_status), Point(0, 40), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
 
-				// put the text Frame number on real frame for information
+				// put the text Frame number on frame for information
 				putText(frame, ptr_struct_obj->road, Point(530, 40), FONT_HERSHEY_PLAIN, 1.5, Scalar(0, 255, 255));
 				putText(frame, ptr_struct_obj->direction, Point(600, 40), FONT_HERSHEY_PLAIN, 1.5, Scalar(0, 255, 255));
 
-				// Put the LOGO on real frame
-				ptr_struct_obj->mat_logo_SL.copyTo(frame(cv::Rect(540, 440, ptr_struct_obj->mat_logo_SL.cols, ptr_struct_obj->mat_logo_SL.rows)));
+				if (ptr_struct_obj->adrive_logo == ADRIVE_LOGO) {
+
+					// Put the LOGO on frame
+					ptr_struct_obj->mat_logo_SL.copyTo(frame(cv::Rect(540, 440, ptr_struct_obj->mat_logo_SL.cols, ptr_struct_obj->mat_logo_SL.rows)));
+				}
+				else {
+
+					// Draw the rect for dispalying the info on process frame
+					rectangle(frame, Point(435, 440), Point(620, 467), Scalar(255, 255, 255), -1, LINE_8);
+
+					// Put the company inforamtion on frame
+					putText(frame, format("Adrive Living Lab"), Point(440, 460), FONT_ITALIC, 0.65, Scalar(255, 150, 45));
+				}
 			}
 
-			if ((ptr_struct_obj->process_video_D2SL == 1)) {
+			if ((ptr_struct_obj->process_video_D2SL == RUN_VIDEO_PROCESS_D2SL_APP)) {
 
-				// put the text Frame number on real frame for information
+				// put the text Frame number on frame for information
 				putText(frame, format(" Frame: %d", ptr_metadata->u4_frame_number), Point(20, 70), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
 
-				// put the text D2L on Real frame for information
+				// put the text D2L on frame for information
 				putText(frame, format(" D2L: %f m", distance), Point(20, 700), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
-			
-				// Put the LOGO on real frame
-				ptr_struct_obj->mat_logo_SL.copyTo(frame(cv::Rect(1120, 650, ptr_struct_obj->mat_logo_SL.cols, ptr_struct_obj->mat_logo_SL.rows)));
+				
+				if (ptr_struct_obj->adrive_logo == ADRIVE_LOGO) {
+
+					// Put the LOGO on frame
+					ptr_struct_obj->mat_logo_SL.copyTo(frame(cv::Rect(1120, 650, ptr_struct_obj->mat_logo_SL.cols, ptr_struct_obj->mat_logo_SL.rows)));
+				}
+				else {
+
+					// Draw the rect for dispalying the info on process frame
+					rectangle(frame, Point(1045, 675), Point(1265 , 708), Scalar(255, 255, 255), -1, LINE_8);
+
+					// Put the company (Adrive LL) inforamtion on frame
+					putText(frame, format("Adrive Living Lab"), Point(1050, 700), FONT_ITALIC, 0.8, Scalar(255, 150, 45));
+				}
 			}
 
-			if (ptr_struct_obj->VO_process_frames_video_save == 1) {
+			if (ptr_struct_obj->vo_process_frames_video_save == VO_PROCESS_FRAME_VIDEO_SAVE) {
 
 				// Write to video file
 				ptr_struct_obj->wrOutVideo.write(frame);
 			}
 			
-			// Display the original frame or process frame
+			// Display the process frame
 			imshow("Process_frame_D2L", frame);
 			
 			break;

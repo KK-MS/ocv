@@ -16,12 +16,11 @@ using namespace cv;
 // Functions Declation
 int process_frame_D2SL(app_struct* ptr_struct_obj);
 
-
 /*
- ** run_side_lane_relocalize_app
+ ** process_video
  **
- ** Load the IMU & CRO Data files & process the GT_D2L & ODO_D2L
- ** Relocalization of car position using Side lane
+ ** Load the direct measure video to process the ODO_D2L
+ ** Save the ODO_d2L in odometry.csv file
  */
 int process_video(app_struct* ptr_struct_obj)
 {
@@ -34,10 +33,12 @@ int process_video(app_struct* ptr_struct_obj)
 	string Odometry_filename = ptr_struct_obj->odometry_filename; // Odometry_csv filename	
 	
 	// Copy the string to the char *variable for FILE reading function (fopen)
-	strcpy(ptr_struct_obj->ODO_filename, Odometry_filename.c_str());
+	strcpy(ptr_struct_obj->odo_filename, Odometry_filename.c_str());
 
 	int iFrameCount = 0;
 	float ODO_D2SL;
+
+	const char* odometry_header_names = "Frame_No, ODO_D2SL_m\n";
 
 	// load the video
 	VideoCapture cap(ptr_struct_obj->Process_video_filename);
@@ -49,7 +50,7 @@ int process_video(app_struct* ptr_struct_obj)
 	}
 
 	// find the Frame height and width
-	int width = cap.get(CAP_PROP_FRAME_WIDTH);   // Captured video frame width in pixels
+	int width = cap.get(CAP_PROP_FRAME_WIDTH);    // Captured video frame width in pixels
 	int height = cap.get(CAP_PROP_FRAME_HEIGHT);  // Captured video frame height in pixels
 
 	printf("\nframe_Height: %d \nframe_width: %d \n\n", height, width);
@@ -65,18 +66,18 @@ int process_video(app_struct* ptr_struct_obj)
 	// Resize the logo For 1280 x 720 frame
 	cv::resize(mlogo, ptr_struct_obj->mat_logo_SL, Size(135, 50));
 
-	if ((ptr_struct_obj->VO_data_save_csv == 1)) {
+	if ((ptr_struct_obj->vo_data_save_csv == 1)) {
 
 		// open the file for saving the process frame data at the end of the loop
-		ptr_struct_obj->odometry_file = fopen(ptr_struct_obj->ODO_filename, "a");
+		ptr_struct_obj->odometry_file = fopen(ptr_struct_obj->odo_filename, "a");
 
-		// Write the process METADATA in .csv file
-		fprintf(ptr_struct_obj->odometry_file, "Frame_No, odo_D2SL\n");
-
+		// Write the Header line in odometry.csv file	
+		fprintf(ptr_struct_obj->odometry_file, odometry_header_names);
+		
 		fclose(ptr_struct_obj->odometry_file);
 	}
 
-	if (ptr_struct_obj->VO_process_frames_video_save == 1) {
+	if (ptr_struct_obj->vo_process_frames_video_save == VO_PROCESS_FRAME_VIDEO_SAVE) {
 
 		// For Saving the process frames as video
 		const String process_video_filename = "data/GH015950_process.avi";
@@ -108,10 +109,10 @@ int process_video(app_struct* ptr_struct_obj)
 			ODO_D2SL = ptr_metadata->f4_odo_distance;  // ODO_D2SL
 
 			// Calculate the Confidence and save the Relocalize data as .csv file
-			if ((ptr_struct_obj->VO_data_save_csv == 1) && ODO_D2SL > 0.12) {
+			if ((ptr_struct_obj->vo_data_save_csv == VO_DATA_SAVE) && ODO_D2SL > 0.12) {
 
 				// open the file for saving the process frame data at the end of the loop
-				ptr_struct_obj->odometry_file = fopen(ptr_struct_obj->ODO_filename, "a");
+				ptr_struct_obj->odometry_file = fopen(ptr_struct_obj->odo_filename, "a");
 
 				// Write the process METADATA in .csv file
 				fprintf(ptr_struct_obj->odometry_file, "%d, %f\n", iFrameCount, ODO_D2SL);
@@ -119,15 +120,12 @@ int process_video(app_struct* ptr_struct_obj)
 				fclose(ptr_struct_obj->odometry_file);
 			}
 
-			waitKey(1);
+			waitKey(ptr_struct_obj->frame_process_delay_ms);
 		}
-		else {
-
-			continue;
-		}
+		else continue;
 
 		iFrameCount ++;
 	}
+
 	return 0;
 }
-

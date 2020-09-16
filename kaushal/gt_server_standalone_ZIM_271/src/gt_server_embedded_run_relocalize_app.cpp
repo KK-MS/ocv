@@ -54,7 +54,7 @@ int run_traffic_sign_relocalize_app(app_struct* ptr_struct_obj)
 
 	float GT_D2TS = 0;
 	float ODO_D2TS = 0;
-	float confidence_TS = 0;	
+	float confidence_TS = 0;
 
 	// calculate the distance (GT_D2L) betwwen two points IMU_lat_lon & GT_lat_lon > bearing angle
 	cal_D2TS_bearing(ptr_struct_obj);
@@ -75,8 +75,7 @@ int run_traffic_sign_relocalize_app(app_struct* ptr_struct_obj)
 	ptr_struct_obj->frame_TS = frame_TS;
 
 	process_frame_D2TS(ptr_struct_obj);
-		
-
+	
 	//find the new car Posiotion Lat_new, Lon_new
 	LandmarkOdometry_TS(ptr_struct_obj);
 
@@ -91,7 +90,7 @@ int run_traffic_sign_relocalize_app(app_struct* ptr_struct_obj)
 
 	// Pass the confidence_TS in to stucture
 	ptr_metadata->f4_out_odo_confidence_TS = confidence_TS;
-		
+	
 	return 0;
 }
 
@@ -219,12 +218,12 @@ int run_car_relocalize_app(app_struct* ptr_struct_obj)
 		char* row_cpy_9 = strdup(line_imu);
 
 		// get the needed couloumn inforamtion
-		string GPS_Time_msec_imu = getfield(row_cpy_1, ptr_struct_obj->time_col);
-		string INS_Lat_Abs_imu   = getfield(row_cpy_2, ptr_struct_obj->lat_col);
-		string INS_Lon_Abs_imu   = getfield(row_cpy_3, ptr_struct_obj->lon_col);
+		string gps_time_msec_imu = getfield(row_cpy_1, ptr_struct_obj->time_col);
+		string ins_lat_Abs_imu   = getfield(row_cpy_2, ptr_struct_obj->lat_col);
+		string ins_lon_Abs_imu   = getfield(row_cpy_3, ptr_struct_obj->lon_col);
 		string frame_SL_imu      = getfield(row_cpy_4, ptr_struct_obj->frame_SL_no_col);
 		string frame_TS_imu      = getfield(row_cpy_5, ptr_struct_obj->frame_TS_no_col);
-		string GPS_Mode_imu      = getfield(row_cpy_6, ptr_struct_obj->GPS_col);
+		string gps_mode_imu      = getfield(row_cpy_6, ptr_struct_obj->GPS_col);
 		string road_imu          = getfield(row_cpy_7, ptr_struct_obj->road_col);
 		string direction_imu     = getfield(row_cpy_8, ptr_struct_obj->direction_col);
 		
@@ -253,72 +252,72 @@ int run_car_relocalize_app(app_struct* ptr_struct_obj)
 		row_cpy_9 = strdup(line_cro);
 
 		// Get the needed couloumn inforamtion
-		string GT_lat_cro       = getfield(row_cpy_1, ptr_struct_obj->GT_lat_col);
-		string GT_lon_cro       = getfield(row_cpy_2, ptr_struct_obj->GT_lon_col);
-		string GT_bear_cro      = getfield(row_cpy_3, ptr_struct_obj->GT_bear_col);
-		string GT_lat_TS_cro    = getfield(row_cpy_4, ptr_struct_obj->GT_lat_TS_col);
-		string GT_lon_TS_cro    = getfield(row_cpy_5, ptr_struct_obj->GT_lon_TS_col);
-		string GT_bear_TS_cro   = getfield(row_cpy_6, ptr_struct_obj->GT_bear_TS_col);
-		string GT_width_TS_cro  = getfield(row_cpy_7, ptr_struct_obj->GT_width_TS_col);
-		string GT_height_TS_cro = getfield(row_cpy_8, ptr_struct_obj->GT_height_TS_col);
-		string GT_shape_TS      = getfield(row_cpy_9, ptr_struct_obj->GT_shape_TS_col);
+		string gt_lat_cro       = getfield(row_cpy_1, ptr_struct_obj->gt_lat_col);
+		string gt_lon_cro       = getfield(row_cpy_2, ptr_struct_obj->gt_lon_col);
+		string gt_bear_cro      = getfield(row_cpy_3, ptr_struct_obj->gt_bear_col);
+		string gt_lat_TS_cro    = getfield(row_cpy_4, ptr_struct_obj->gt_lat_TS_col);
+		string gt_lon_TS_cro    = getfield(row_cpy_5, ptr_struct_obj->gt_lon_TS_col);
+		string gt_bear_TS_cro   = getfield(row_cpy_6, ptr_struct_obj->gt_bear_TS_col);
+		string gt_width_TS_cro  = getfield(row_cpy_7, ptr_struct_obj->gt_width_TS_col);
+		string gt_height_TS_cro = getfield(row_cpy_8, ptr_struct_obj->gt_height_TS_col);
+		string gt_shape_TS      = getfield(row_cpy_9, ptr_struct_obj->gt_shape_TS_col);
 
-		if ((!frame_SL_imu.empty()) && (stoi(frame_SL_imu) != 0) && (!GPS_Time_msec_imu.empty()) && (!INS_Lat_Abs_imu.empty()) && (!INS_Lon_Abs_imu.empty()) && (GT_lat_cro != "None") && (GT_lon_cro != "None"))
+		if ((!frame_SL_imu.empty()) && (stoi(frame_SL_imu) != 0) && (!gps_time_msec_imu.empty()) && (!ins_lat_Abs_imu.empty()) && (!ins_lon_Abs_imu.empty()) && (gt_lat_cro != "None") && (gt_lon_cro != "None"))
 		{
 
 			// Convert the string to perticualr data foramt and assing it to stucture variable
-			ptr_metadata->u4_timestampL      = stoi(GPS_Time_msec_imu);
-			ptr_metadata->d8_ins_latitude    = stod(INS_Lat_Abs_imu);
-			ptr_metadata->d8_ins_longitude   = stod(INS_Lon_Abs_imu);
+			ptr_metadata->u4_timestampL      = stoi(gps_time_msec_imu);
+			ptr_metadata->d8_ins_latitude    = stod(ins_lat_Abs_imu);
+			ptr_metadata->d8_ins_longitude   = stod(ins_lon_Abs_imu);
 			ptr_metadata->u4_frame_number    = stoi(frame_SL_imu);
 			ptr_metadata->u4_frame_number_TS = stoi(frame_TS_imu);
-			ptr_metadata->u4_ins_gps_status  = stoi(GPS_Mode_imu);
+			ptr_metadata->u4_ins_gps_status  = stoi(gps_mode_imu);
 
 			// Copying the contents of the string to char array for saving the road information in .csv File
-			strcpy(ptr_struct_obj->road, road_imu.c_str());
-			strcpy(ptr_struct_obj->direction, direction_imu.c_str());
+			strcpy(ptr_struct_obj->road_name, road_imu.c_str());
+			strcpy(ptr_struct_obj->direction_name, direction_imu.c_str());
 
 			printf("\nIMU: %d\t%d\t%0.8f\t%0.8f\t%d\t%s\t%s\n", ptr_metadata->u4_frame_number, ptr_metadata->u4_timestampL
 				, ptr_metadata->d8_ins_latitude, ptr_metadata->d8_ins_longitude, ptr_metadata->u4_ins_gps_status
-				, ptr_struct_obj->road, ptr_struct_obj->direction);
+				, ptr_struct_obj->road_name, ptr_struct_obj->direction_name);
 
 			// Convert the string to perticualr data foramt and assing it to stucture variable
-			ptr_gtMetadata->d8_gt_latitude     = stod(GT_lat_cro);
-			ptr_gtMetadata->d8_gt_longitude    = stod(GT_lon_cro);
-			ptr_gtMetadata->f4_gt_raodbearing  = stof(GT_bear_cro);
+			ptr_gtMetadata->d8_gt_latitude     = stod(gt_lat_cro);
+			ptr_gtMetadata->d8_gt_longitude    = stod(gt_lon_cro);
+			ptr_gtMetadata->f4_gt_raodbearing  = stof(gt_bear_cro);
 
 			printf("\nCRO_SL %d: %.8f\t%.8f\n", ptr_metadata->u4_frame_number, ptr_gtMetadata->d8_gt_latitude
 				, ptr_gtMetadata->d8_gt_longitude);
 
-			ptr_gtMetadata->d8_gt_latitude_TS = stod(GT_lat_TS_cro);
-			ptr_gtMetadata->d8_gt_longitude_TS = stod(GT_lon_TS_cro);
-			ptr_gtMetadata->f4_gt_raod_bear2TS = stof(GT_bear_TS_cro);
-			ptr_gtMetadata->f4_gt_width_TS = stod(GT_width_TS_cro);
-			ptr_gtMetadata->f4_gt_height_TS = stod(GT_height_TS_cro);
-			ptr_struct_obj->shape_TS = GT_shape_TS;
+			ptr_gtMetadata->d8_gt_latitude_TS  = stod(gt_lat_TS_cro);
+			ptr_gtMetadata->d8_gt_longitude_TS = stod(gt_lon_TS_cro);
+			ptr_gtMetadata->f4_gt_raod_bear2TS = stof(gt_bear_TS_cro);
+			ptr_gtMetadata->f4_gt_width_TS     = stod(gt_width_TS_cro);
+			ptr_gtMetadata->f4_gt_height_TS    = stod(gt_height_TS_cro);
+			ptr_struct_obj->shape_TS           = gt_shape_TS;
 
 			// Copying the contents of the string to char array for saving the road information in .csv File
-			strcpy(ptr_struct_obj->TS_shape, GT_shape_TS.c_str());
+			strcpy(ptr_struct_obj->TS_shape, gt_shape_TS.c_str());
 
 			printf("\nCRO_TS %d: %s\t%.8f\t%.8f\t%f\t%f\t%f\n", ptr_metadata->u4_frame_number_TS, ptr_struct_obj->TS_shape
 				, ptr_gtMetadata->d8_gt_latitude_TS, ptr_gtMetadata->d8_gt_longitude_TS, ptr_gtMetadata->f4_gt_raod_bear2TS
 				, ptr_gtMetadata->f4_gt_width_TS, ptr_gtMetadata->f4_gt_height_TS);
-					
+			
 			// Relocalize the car position using side lane detection and D2SL
 			run_side_lane_relocalize_app(ptr_struct_obj);
 
 			// If Traffic info (shape, position or Frame) is available then also Relcoalize the car using D2TS
-			if (GT_shape_TS != "None" && ptr_struct_obj->traffic_info == 1)
-			{
+			if ((gt_shape_TS != "None") && (ptr_struct_obj->traffic_info == TRAFFIC_INFO)) {
+
 				// Relocalization using Traffic Sign by D2TS
 				run_traffic_sign_relocalize_app(ptr_struct_obj);
 			}
 			
 			// Calculate the Confidence and save the Relocalize data as .csv file
-			if ((ptr_struct_obj->VO_data_save_csv == 1)) {
+			if ((ptr_struct_obj->vo_data_save_csv == VO_DATA_SAVE)) {
 				
 				// open the file for saving the process frame data at the end of the loop
-				ptr_struct_obj->odometry_file = fopen(ptr_struct_obj->ODO_filename, "a");
+				ptr_struct_obj->odometry_file = fopen(ptr_struct_obj->odo_filename, "a");
 			
 				odometry_data_save(ptr_struct_obj);
 
@@ -326,7 +325,7 @@ int run_car_relocalize_app(app_struct* ptr_struct_obj)
 			}
 			
 			// Save the process D2L / D2TS frame as a image
-			if (ptr_struct_obj->VO_process_frame_save == 1) {
+			if (ptr_struct_obj->vo_process_frame_save == VO_PROCESS_FRAME_SAVE) {
 
 				// To create the filenames as imu_frame number for save the process frames (SL)
 				std::stringstream ss;
@@ -345,9 +344,9 @@ int run_car_relocalize_app(app_struct* ptr_struct_obj)
 
 				printf("\nProcess Frame_TS saved as image.");
 			}
-						
+			
 			// Time delay between two frames to prcess in milisecond
-			waitKey(0);
+			waitKey(ptr_struct_obj->frame_process_delay_ms);
 		}
 		else continue;
 

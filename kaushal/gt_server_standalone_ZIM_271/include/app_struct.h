@@ -35,12 +35,34 @@
 #define EN	 0.0818191908426         // Eccentricity
 #define M_PI 3.14159265358979323846
 
+// MACROS
+
 // Frame Status
 #define FRAME_STATUS_8  8
 #define FRAME_STATUS_4  4
 #define FRAME_STATUS_2  2
 #define FRAME_STATUS_1  1
 #define FRAME_STATUS_0  0
+
+// for the creating the ROI to process the D2SL based on IMU GPS_Status
+#define GPS_STATUS_8    8
+#define GPS_STATUS_4    4
+#define GPS_STATUS_2    2
+#define GPS_STATUS_1    1
+
+#define RUN_RELOCALISATION_APP       1
+#define RUN_VIDEO_PROCESS_D2SL_APP   1
+  
+#define VO_DATA_SAVE                 1
+#define VO_PROCESS_FRAME_SAVE        1 
+#define VO_PROCESS_FRAME_VIDEO_SAVE  1
+#define TRAFFIC_INFO                 1
+#define VIDEO_PROCESS_D2SL           1
+#define RELOCALISTION_APP_RUN        1
+#define ADRIVE_LOGO                  1
+
+
+
 
 // Namespace
 using namespace std;
@@ -68,32 +90,34 @@ typedef struct app_struct {
   string shape_TS;          // shape_TS
   
   // Input Data for csv file reading
-  string GPS_Time;
-  string INS_Lat;
-  string INS_Lon;
+  string gps_time;
+  string ins_lat;
+  string ins_lon;
   string frame_number_SL;
   string frame_number_TS;
-  string GPS_status;
-  string Road;
-  string Direction;
-  string GT_lat;
-  string GT_lon;
-  string GT_road_bearing;
-  string GT_lat_TS;
-  string GT_lon_TS;
-  string GT_road_bearing_TS;
-  string GT_width_TS;
-  string GT_height_TS;
-  string GT_shape_TS;
+  string gps_status;
+  string road;
+  string direction;
+  string gt_lat;
+  string gt_lon;
+  string gt_road_bearing;
+  string gt_lat_TS;
+  string gt_lon_TS;
+  string gt_road_bearing_TS;
+  string gt_width_TS;
+  string gt_height_TS;
+  string gt_shape_TS;
 
   // Process / Visual Odometry data saving options > Get the info from config.json file
-  int VO_data_save_csv;
-  int VO_process_frame_save;
-  int VO_process_frames_video_save;
+  int vo_data_save_csv;
+  int vo_process_frame_save;
+  int vo_process_frames_video_save;
   int side_lane_info;
   int traffic_info;
   int process_video_D2SL;
-  int relocalization_app;
+  int relocalisation_app;
+  int adrive_logo;
+  int frame_process_delay_ms;    // Between two frames delay in milisecond
   
   // variables for process the Visual Odometry from congig.txt file
   int start_X;
@@ -104,8 +128,8 @@ typedef struct app_struct {
   float cali_max_D2L;
     
   // FILE for load the IMU, CRO & Odometry files
-  FILE* imu_file;
-  FILE* cro_file;
+  FILE *imu_file;
+  FILE *cro_file;
   FILE *odometry_file;
   
   // variable to assign the IMU file coloumn number according to the needed header information
@@ -119,20 +143,20 @@ typedef struct app_struct {
   int direction_col = 0;
     
   // variable to assign the CRO file coloumn number according to the needed header information
-  int GT_lat_col = 0;
-  int GT_lon_col = 0;
-  int GT_bear_col = 0;
-  int GT_lat_TS_col = 0;
-  int GT_lon_TS_col = 0;
-  int GT_bear_TS_col = 0;
-  int GT_width_TS_col = 0;
-  int GT_height_TS_col = 0;
-  int GT_shape_TS_col = 0;
+  int gt_lat_col = 0;
+  int gt_lon_col = 0;
+  int gt_bear_col = 0;
+  int gt_lat_TS_col = 0;
+  int gt_lon_TS_col = 0;
+  int gt_bear_TS_col = 0;
+  int gt_width_TS_col = 0;
+  int gt_height_TS_col = 0;
+  int gt_shape_TS_col = 0;
   
   // variables for printing the road info on the Process Frame / Odometry.csv file
-  char ODO_filename[50];
-  char road[15];
-  char direction[15];
+  char odo_filename[50];
+  char road_name[15];
+  char direction_name[15];
   char TS_shape[15];
   
   char video_filename[100];
@@ -141,14 +165,17 @@ typedef struct app_struct {
   float gps_lat_offset;
   float gps_lon_offset;
 
+  // ROI parameters for process the direct Video to D2L without GT Info
+  int roi_x1;
+  int roi_y1;
+  int roi_x2;
+  int roi_y2;
+  
   // Variables for load the IMU frame_SL_TS / Logo
   Mat frame_SL;
   Mat frame_TS;
   Mat mat_logo_SL;
   Mat mat_logo_TS;
-  
-  const char *frame_name;
-  const char *frame_save_no;
   
   // Process Frames save as Video
   VideoWriter wrOutVideo;

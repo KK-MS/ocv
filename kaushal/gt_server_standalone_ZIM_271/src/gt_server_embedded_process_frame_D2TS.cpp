@@ -122,114 +122,26 @@ int process_frame_D2TS(app_struct* ptr_struct_obj)
 	// put the txt on frame for information
 	putText(frame_TS, format("Frame: %d", ptr_metadata->u4_frame_number_TS), Point(50, 50), FONT_HERSHEY_PLAIN, 1, Scalar(255, 0, 255), 1.5);
 
+	if (ptr_struct_obj->adrive_logo == ADRIVE_LOGO) {
+
+		// Put the LOGO on frame
+		ptr_struct_obj->mat_logo_TS.copyTo(frame_TS(cv::Rect(1120, 650, ptr_struct_obj->mat_logo_TS.cols, ptr_struct_obj->mat_logo_TS.rows)));
+	}
+	else {
+
+		// Draw the rect for dispalying the info on process frame
+		rectangle(frame_TS, Point(1045, 675), Point(1265, 708), Scalar(255, 255, 255), -1, LINE_8);
+
+		// Put the company (Adrive LL) inforamtion on frame
+		putText(frame_TS, format("Adrive Living Lab"), Point(1050, 700), FONT_ITALIC, 0.8, Scalar(255, 150, 45));
+	}
 	// Put the LOGO on resize frame
 	ptr_struct_obj->mat_logo_TS.copyTo(frame_TS(cv::Rect(1120, 650, ptr_struct_obj->mat_logo_TS.cols, ptr_struct_obj->mat_logo_TS.rows)));
-
-	// Write to video file
-	//wrOutVideo.write(frame);
-
+	
 	imshow("D2TS", frame_TS);
 
+	// Pass the process frame in to the structure 
 	ptr_struct_obj->frame_TS = frame_TS;
 
     return 0;
 }
-
-#if 0
-
-// convert our fame to HSV Space
-cvtColor(ROI, HSV_Img, COLOR_BGR2HSV);
-
-// white color thresholding
-Scalar whiteMinScalar = Scalar(100, 100, 50);
-Scalar whiteMaxScalar = Scalar(255, 189, 255);
-
-inRange(ROI, whiteMinScalar, whiteMaxScalar, LinesImg);
-
-// Edge detection using canny detector
-int minCannyThreshold = 190;
-int maxCannyThreshold = 230;
-Canny(LinesImg, LinesImg, minCannyThreshold, maxCannyThreshold, 3, true);
-
-// Morphological Operation
-Mat k = getStructuringElement(MORPH_RECT, Size(3, 3), Point(-1, -1));
-
-morphologyEx(LinesImg, LinesImg, MORPH_CLOSE, k, Point(-1, -1), 1);
-
-// now applying hough transform TO dETECT Lines in our image
-vector<Vec4i> lines;
-
-HoughLinesP(LinesImg, lines, 1, CV_PI / 180, 5, 0, 10);
-
-for (size_t i = 0; i < lines.size(); i++)
-{
-	Vec4i l = lines[i];
-	Scalar greenColor = Scalar(0, 255, 0);
-	line(ROI, Point(l[0], l[1]), Point(l[2], l[3]), greenColor, 1.5, 4);
-}
-
-// Main frame with Process ROI > Edge detection for ODO_D2L measurement
-Canny(frame, LinesImg, 250, 255, 3, true);
-
-// process ODO_D2L
-for (int i = START_X; i < FRAME_WIDTH; i++)
-{
-	pixel = (uchar)LinesImg.at<uchar>(Point(i, END_Y));
-
-	if (pixel >= iLaneColorUpperThreshold) {
-		iLanePixelCount++;
-	}
-	else {
-		iLanePixelCount = 0;
-	}
-
-	if (pixel >= iLaneColorUpperThreshold) {
-
-		// Find the D2L
-		Point2f a(START_X, START_Y);
-		Point2f b(i, END_Y);
-
-		int result = cv::norm(cv::Mat(b), cv::Mat(a));
-
-		float distance = result * PIXEL_DIST * 0.001;
-
-		printf("\nx:%d, y:%d , val= %u", i, END_Y, pixel);
-		printf("\nWe got the lane, found D2L= %f m\n", distance);
-
-		ptr_metadata->f4_odo_distance = distance;
-
-		// Display the Frames
-		line(frame, Point(START_X, START_Y), Point(i, END_Y), Scalar(255, 255, 0), 1, 8);
-
-		// Draw the rect of ROI_GT on process frame
-		rectangle(frame, Point(ROI_x1, ROI_y1), Point((ROI_x1 + ROI_x2), (ROI_y1 + ROI_y2)), Scalar(0, 255, 255), 1, LINE_8);
-
-		// put the text Frame number on real frame for information
-		putText(frame, format(" Frame: %d", ptr_metadata->u4_frame_number), Point(0, 450), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
-
-		// put the text D2L on Real frame for information
-		putText(frame, format(" D2L: %f m", distance), Point(0, 420), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
-
-		// put the Frame GPS Status on Real frame for information
-		putText(frame, format(" INS_GPS: %d", gps_status), Point(0, 40), FONT_HERSHEY_PLAIN, 1.5, Scalar(255, 255, 255));
-
-		// put the text Frame number on real frame for information
-		putText(frame, ptr_server_obj->road, Point(560, 40), FONT_HERSHEY_PLAIN, 1.5, Scalar(0, 255, 255));
-		putText(frame, ptr_server_obj->direction, Point(600, 40), FONT_HERSHEY_PLAIN, 1.5, Scalar(0, 255, 255));
-
-		// Put the LOGO on real frame
-		ptr_server_obj->mat_logo.copyTo(frame(cv::Rect(540, 440, ptr_server_obj->mat_logo.cols, ptr_server_obj->mat_logo.rows)));
-
-		if (PROCESS_FRAMES_VIDEO_SAVE == 1) {
-
-			// Write to video file
-			ptr_server_obj->wrOutVideo.write(frame);
-		}
-
-		// Display the original frame or process frame
-		imshow("Process_frame_D2L", frame);
-
-		break;
-	}
-}
-#endif
