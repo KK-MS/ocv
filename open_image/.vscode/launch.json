@@ -13,7 +13,6 @@
             "stopAtEntry": false,
             "cwd": "C:\\msys64\\mingw64\\bin",
             "environment": [],
-            "console": "externalTerminal",
             "MIMode": "gdb",
             "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
             "setupCommands": [

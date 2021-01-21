@@ -6,9 +6,13 @@
             "command": "C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-g++.exe",
             "args": [
                 "-g",
-                "${file}",
+                // "${file}",
+                "${workspaceFolder}\\app.cpp",
+                "${workspaceFolder}\\open_image.cpp",
+                "-I${workspaceFolder}\\include",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${workspaceFolder}\\app.exe",
+                //"${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
                 "cwd": "C:\\msys64\\mingw64\\bin"

@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-int main()
+int open_image()
 {
-    std::cout << "Hello World!\n";
+    std::cout << "Open image: !!\n";
 }
