@@ -10,6 +10,11 @@
                 "${workspaceFolder}\\app.cpp",
                 "${workspaceFolder}\\open_image.cpp",
                 "-I${workspaceFolder}\\include",
+                "-IC:\\msys64\\mingw64\\include\\opencv4",
+                "-LC:\\msys64\\mingw64\\bin",
+                "-lopencv_core450",
+                "-lopencv_highgui450",
+                "-lopencv_imgcodecs450",
                 "-o",
                 "${workspaceFolder}\\app.exe",
                 //"${fileDirname}\\${fileBasenameNoExtension}.exe"

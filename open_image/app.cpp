@@ -5,10 +5,12 @@
 #include <iostream>
 
 // App specific
-#include "app.h"
+#include <app.h>
 
-int main()
+int main(int argc, char **argv)
 {
     std::cout << "Hello World!\n";
-    open_image();
+    if (argc > 1) {
+    open_image(argv[1]);
+    }
 }

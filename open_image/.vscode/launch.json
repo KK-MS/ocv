@@ -8,8 +8,11 @@
             "name": "g++.exe - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
-            "args": [],
+            //"program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "program": "${workspaceFolder}\\app.exe",
+            "args": [
+                "${workspaceFolder}\\data\\sample.jpg",
+            ],
             "stopAtEntry": false,
             "cwd": "C:\\msys64\\mingw64\\bin",
             "environment": [],
